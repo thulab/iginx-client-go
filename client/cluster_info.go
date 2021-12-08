@@ -37,9 +37,24 @@ type ClusterInfo struct {
 	localMetaStorageInfo *LocalMetaStorageInfo
 }
 
-func NewClusterInfo(resp *rpc.GetClusterInfoResp) ClusterInfo {
+func NewClusterInfoWithResp(resp *rpc.GetClusterInfoResp) *ClusterInfo {
+	return NewClusterInfo(
+		resp.GetIginxInfos(),
+		resp.GetStorageEngineInfos(),
+		resp.GetMetaStorageInfos(),
+		resp.GetLocalMetaStorageInfo(),
+	)
+}
+
+func NewClusterInfo(
+	iginxInfos []*rpc.IginxInfo,
+	storageEngineInfos []*rpc.StorageEngineInfo,
+	metaStorageInfos []*rpc.MetaStorageInfo,
+	localMetaStorageInfo *rpc.LocalMetaStorageInfo,
+) *ClusterInfo {
+
 	var iginxInfoList []IginxInfo
-	for _, info := range resp.GetIginxInfos() {
+	for _, info := range iginxInfos {
 		iginxInfo := IginxInfo{
 			Id:   info.ID,
 			Ip:   info.IP,
@@ -49,7 +64,7 @@ func NewClusterInfo(resp *rpc.GetClusterInfoResp) ClusterInfo {
 	}
 
 	var storageEngineInfoList []StorageEngineInfo
-	for _, info := range resp.GetStorageEngineInfos() {
+	for _, info := range storageEngineInfos {
 		storageInfo := StorageEngineInfo{
 			Id:   info.ID,
 			Ip:   info.IP,
@@ -60,7 +75,7 @@ func NewClusterInfo(resp *rpc.GetClusterInfoResp) ClusterInfo {
 	}
 
 	var metaStorageInfoList []MetaStorageInfo
-	for _, info := range resp.GetMetaStorageInfos() {
+	for _, info := range metaStorageInfos {
 		metaInfo := MetaStorageInfo{
 			Ip:   info.IP,
 			Port: info.Port,
@@ -70,13 +85,13 @@ func NewClusterInfo(resp *rpc.GetClusterInfoResp) ClusterInfo {
 	}
 
 	var localInfo *LocalMetaStorageInfo
-	if resp.GetLocalMetaStorageInfo() != nil {
+	if localMetaStorageInfo != nil {
 		localInfo = &LocalMetaStorageInfo{
-			path: resp.LocalMetaStorageInfo.Path,
+			path: localMetaStorageInfo.Path,
 		}
 	}
 
-	return ClusterInfo{
+	return &ClusterInfo{
 		iginxInfo:            iginxInfoList,
 		storageEngineInfo:    storageEngineInfoList,
 		metaStorageInfo:      metaStorageInfoList,

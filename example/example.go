@@ -31,6 +31,9 @@ func main() {
 
 	defer session.Close()
 
+	// 清空数据
+	clearData()
+
 	// 查询副本数量
 	showReplicaNum()
 	// 查询集群信息
