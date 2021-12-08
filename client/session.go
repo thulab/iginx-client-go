@@ -89,7 +89,7 @@ func (s *Session) Open() error {
 	if err != nil {
 		return err
 	} else if resp == nil {
-		return errors.New("open session resp is empty")
+		return errors.New("open session resp is nil")
 	}
 
 	err = s.verifyStatus(resp.GetStatus())
@@ -177,7 +177,7 @@ func (s *Session) GetReplicaNum() (int32, error) {
 	if err != nil {
 		return 0, err
 	} else if resp == nil {
-		return 0, errors.New("get replica num resp is empty")
+		return 0, errors.New("get replica num resp is nil")
 	}
 
 	err = s.verifyStatus(resp.GetStatus())
@@ -197,7 +197,7 @@ func (s *Session) GetClusterInfo() (*ClusterInfo, error) {
 	if err != nil {
 		return nil, err
 	} else if resp == nil {
-		return nil, errors.New("get cluster info resp is empty")
+		return nil, errors.New("get cluster info resp is nil")
 	}
 
 	err = s.verifyStatus(resp.GetStatus())
@@ -205,8 +205,8 @@ func (s *Session) GetClusterInfo() (*ClusterInfo, error) {
 		return nil, err
 	}
 
-	ret := NewClusterInfo(resp)
-	return &ret, nil
+	ret := NewClusterInfoWithResp(resp)
+	return ret, nil
 }
 
 func (s *Session) AddUser(username, password string, auths []rpc.AuthType) error {
@@ -279,7 +279,7 @@ func (s *Session) ListTimeSeries() ([]TimeSeries, error) {
 	if err != nil {
 		return nil, err
 	} else if resp == nil {
-		return nil, errors.New("show columns resp is empty")
+		return nil, errors.New("show columns resp is nil")
 	}
 
 	err = s.verifyStatus(resp.GetStatus())
@@ -739,7 +739,7 @@ func (s *Session) Query(paths []string, startTime, endTime int64) (*QueryDataSet
 	if err != nil {
 		return nil, err
 	} else if resp == nil {
-		return nil, errors.New("query data resp is empty")
+		return nil, errors.New("query data resp is nil")
 	}
 
 	err = s.verifyStatus(resp.GetStatus())
@@ -747,15 +747,15 @@ func (s *Session) Query(paths []string, startTime, endTime int64) (*QueryDataSet
 		return nil, err
 	}
 
-	rawDataSet := resp.QueryDataSet
+	rawDataSet := resp.GetQueryDataSet()
 	ret := NewQueryDataSet(
-		resp.Paths,
-		resp.DataTypeList,
-		rawDataSet.Timestamps,
-		rawDataSet.ValuesList,
-		rawDataSet.BitmapList,
+		resp.GetPaths(),
+		resp.GetDataTypeList(),
+		rawDataSet.GetTimestamps(),
+		rawDataSet.GetValuesList(),
+		rawDataSet.GetBitmapList(),
 	)
-	return &ret, nil
+	return ret, nil
 }
 
 func (s *Session) ValueFilterQuery(paths []string, startTime, endTime int64, expression string) (*QueryDataSet, error) {
@@ -771,7 +771,7 @@ func (s *Session) ValueFilterQuery(paths []string, startTime, endTime int64, exp
 	if err != nil {
 		return nil, err
 	} else if resp == nil {
-		return nil, errors.New("value filter query data resp is empty")
+		return nil, errors.New("value filter query data resp is nil")
 	}
 
 	err = s.verifyStatus(resp.GetStatus())
@@ -779,15 +779,15 @@ func (s *Session) ValueFilterQuery(paths []string, startTime, endTime int64, exp
 		return nil, err
 	}
 
-	rawDataSet := resp.QueryDataSet
+	rawDataSet := resp.GetQueryDataSet()
 	ret := NewQueryDataSet(
-		resp.Paths,
-		resp.DataTypeList,
-		rawDataSet.Timestamps,
-		rawDataSet.ValuesList,
-		rawDataSet.BitmapList,
+		resp.GetPaths(),
+		resp.GetDataTypeList(),
+		rawDataSet.GetTimestamps(),
+		rawDataSet.GetValuesList(),
+		rawDataSet.GetBitmapList(),
 	)
-	return &ret, nil
+	return ret, nil
 }
 
 func (s *Session) DownSampleQuery(paths []string, startTime, endTime int64, aggregateType rpc.AggregateType, precision int64) (*QueryDataSet, error) {
@@ -804,7 +804,7 @@ func (s *Session) DownSampleQuery(paths []string, startTime, endTime int64, aggr
 	if err != nil {
 		return nil, err
 	} else if resp == nil {
-		return nil, errors.New("downsample query data resp is empty")
+		return nil, errors.New("downsample query data resp is nil")
 	}
 
 	err = s.verifyStatus(resp.GetStatus())
@@ -812,15 +812,15 @@ func (s *Session) DownSampleQuery(paths []string, startTime, endTime int64, aggr
 		return nil, err
 	}
 
-	rawDataSet := resp.QueryDataSet
+	rawDataSet := resp.GetQueryDataSet()
 	ret := NewQueryDataSet(
-		resp.Paths,
-		resp.DataTypeList,
-		rawDataSet.Timestamps,
-		rawDataSet.ValuesList,
-		rawDataSet.BitmapList,
+		resp.GetPaths(),
+		resp.GetDataTypeList(),
+		rawDataSet.GetTimestamps(),
+		rawDataSet.GetValuesList(),
+		rawDataSet.GetBitmapList(),
 	)
-	return &ret, nil
+	return ret, nil
 }
 
 func (s *Session) AggregateQuery(paths []string, startTime, endTime int64, aggregateType rpc.AggregateType) (*AggregateQueryDataSet, error) {
@@ -836,7 +836,7 @@ func (s *Session) AggregateQuery(paths []string, startTime, endTime int64, aggre
 	if err != nil {
 		return nil, err
 	} else if resp == nil {
-		return nil, errors.New("query data resp is empty")
+		return nil, errors.New("query data resp is nil")
 	}
 
 	err = s.verifyStatus(resp.GetStatus())
@@ -845,13 +845,13 @@ func (s *Session) AggregateQuery(paths []string, startTime, endTime int64, aggre
 	}
 
 	ret := NewAggregateQueryDataSet(
-		resp.Paths,
-		resp.Timestamps,
-		resp.ValuesList,
-		resp.DataTypeList,
+		resp.GetPaths(),
+		resp.GetTimestamps(),
+		resp.GetValuesList(),
+		resp.GetDataTypeList(),
 		aggregateType,
 	)
-	return &ret, nil
+	return ret, nil
 }
 
 func (s *Session) LastQuery(paths []string, startTime int64) (*LastQueryDataSet, error) {
@@ -865,7 +865,7 @@ func (s *Session) LastQuery(paths []string, startTime int64) (*LastQueryDataSet,
 	if err != nil {
 		return nil, err
 	} else if resp == nil {
-		return nil, errors.New("query data resp is empty")
+		return nil, errors.New("query data resp is nil")
 	}
 
 	err = s.verifyStatus(resp.GetStatus())
@@ -874,12 +874,33 @@ func (s *Session) LastQuery(paths []string, startTime int64) (*LastQueryDataSet,
 	}
 
 	ret := NewLastQueryDataSet(
-		resp.Paths,
-		resp.Timestamps,
-		resp.ValuesList,
-		resp.DataTypeList,
+		resp.GetPaths(),
+		resp.GetTimestamps(),
+		resp.GetValuesList(),
+		resp.GetDataTypeList(),
 	)
-	return &ret, nil
+	return ret, nil
+}
+
+func (s *Session) ExecuteSQL(sql string) (*SQLDataSet, error) {
+	req := rpc.ExecuteSqlReq{
+		SessionId: s.sessionId,
+		Statement: sql,
+	}
+
+	resp, err := s.client.ExecuteSql(context.Background(), &req)
+	if err != nil {
+		return nil, err
+	} else if resp == nil {
+		return nil, errors.New("execute SQL resp is nil")
+	}
+
+	err = s.verifyStatus(resp.GetStatus())
+	if err != nil {
+		return nil, err
+	}
+
+	return NewSQLDataSet(resp), err
 }
 
 func (s *Session) verifyStatus(status *rpc.Status) error {

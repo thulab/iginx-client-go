@@ -13,7 +13,7 @@ type QueryDataSet struct {
 	Values     [][]interface{}
 }
 
-func NewQueryDataSet(paths []string, types []rpc.DataType, timeBuffer []byte, valuesList, bitmapList [][]byte) QueryDataSet {
+func NewQueryDataSet(paths []string, types []rpc.DataType, timeBuffer []byte, valuesList, bitmapList [][]byte) *QueryDataSet {
 	var values [][]interface{}
 	for i := range valuesList {
 		var rowValues []interface{}
@@ -33,7 +33,7 @@ func NewQueryDataSet(paths []string, types []rpc.DataType, timeBuffer []byte, va
 		values = append(values, rowValues)
 	}
 
-	return QueryDataSet{
+	return &QueryDataSet{
 		Paths:      paths,
 		Types:      types,
 		Timestamps: GetLongArrayFromBytes(timeBuffer),
@@ -67,7 +67,7 @@ type AggregateQueryDataSet struct {
 	Values        []interface{}
 }
 
-func NewAggregateQueryDataSet(paths []string, timeBuffer, valuesBuffer []byte, types []rpc.DataType, aggregateType rpc.AggregateType) AggregateQueryDataSet {
+func NewAggregateQueryDataSet(paths []string, timeBuffer, valuesBuffer []byte, types []rpc.DataType, aggregateType rpc.AggregateType) *AggregateQueryDataSet {
 	dataSet := AggregateQueryDataSet{
 		Paths:         paths,
 		AggregateType: aggregateType,
@@ -78,31 +78,22 @@ func NewAggregateQueryDataSet(paths []string, timeBuffer, valuesBuffer []byte, t
 		dataSet.Timestamps = GetLongArrayFromBytes(timeBuffer)
 	}
 
-	return dataSet
+	return &dataSet
 }
 
 func (s *AggregateQueryDataSet) PrintDataSet() {
 	fmt.Println("Start print aggregate data set")
 	fmt.Println("-------------------------------------")
-	if s.Timestamps != nil {
-		for _, path := range s.Paths {
-			fmt.Print(s.AggregateType.String()+"("+path+")", " ")
-		}
-		fmt.Println()
-		for _, value := range s.Values {
-			fmt.Print(value, " ")
-		}
-		fmt.Println()
-	} else {
-		for i := range s.Timestamps {
-			fmt.Print("Time ")
-			fmt.Print(s.AggregateType.String()+"("+s.Paths[i]+")", " ")
-			fmt.Println()
-			fmt.Print(s.Timestamps[i], " ")
-			fmt.Print(s.Values[i])
-			fmt.Println()
-		}
+
+	for _, path := range s.Paths {
+		fmt.Print(s.AggregateType.String()+"("+path+")", " ")
 	}
+	fmt.Println()
+	for _, value := range s.Values {
+		fmt.Print(value, " ")
+	}
+	fmt.Println()
+
 	fmt.Println("-------------------------------------")
 	fmt.Println()
 }
@@ -127,7 +118,7 @@ type LastQueryDataSet struct {
 	Points []Point
 }
 
-func NewLastQueryDataSet(paths []string, timeBuffer, valuesBuffer []byte, types []rpc.DataType) LastQueryDataSet {
+func NewLastQueryDataSet(paths []string, timeBuffer, valuesBuffer []byte, types []rpc.DataType) *LastQueryDataSet {
 	timestamps := GetLongArrayFromBytes(timeBuffer)
 	values := GetValueByDataTypeList(valuesBuffer, types)
 
@@ -135,7 +126,7 @@ func NewLastQueryDataSet(paths []string, timeBuffer, valuesBuffer []byte, types 
 	for i := range paths {
 		points = append(points, NewPoint(paths[i], types[i], timestamps[i], values[i]))
 	}
-	return LastQueryDataSet{Points: points}
+	return &LastQueryDataSet{Points: points}
 }
 
 func (s *LastQueryDataSet) PrintDataSet() {
@@ -147,4 +138,120 @@ func (s *LastQueryDataSet) PrintDataSet() {
 	}
 	fmt.Println("-------------------------------------")
 	fmt.Println()
+}
+
+type SQLDataSet struct {
+	Type          rpc.SqlType
+	ParseErrorMsg string
+
+	QueryDataSet          *QueryDataSet
+	LastQueryDataSet      *LastQueryDataSet
+	AggregateQueryDataSet *AggregateQueryDataSet
+
+	TimeSeries  []*TimeSeries
+	ReplicaNum  int32
+	PointsNum   int64
+	ClusterInfo *ClusterInfo
+}
+
+func NewSQLDataSet(resp *rpc.ExecuteSqlResp) *SQLDataSet {
+	dataSet := &SQLDataSet{
+		Type:          resp.GetType(),
+		ParseErrorMsg: resp.GetParseErrorMsg(),
+	}
+
+	switch dataSet.Type {
+	case rpc.SqlType_GetReplicaNum:
+		dataSet.ReplicaNum = resp.GetReplicaNum()
+		break
+	case rpc.SqlType_CountPoints:
+		dataSet.PointsNum = resp.GetPointsNum()
+		break
+	case rpc.SqlType_ShowTimeSeries:
+		var timeSeries []*TimeSeries
+		for i := 0; i < len(resp.GetPaths()); i++ {
+			ts := NewTimeSeries(resp.GetPaths()[i], resp.GetDataTypeList()[i])
+			timeSeries = append(timeSeries, &ts)
+		}
+		dataSet.TimeSeries = timeSeries
+		break
+	case rpc.SqlType_ShowClusterInfo:
+		dataSet.ClusterInfo = NewClusterInfo(
+			resp.GetIginxInfos(),
+			resp.GetStorageEngineInfos(),
+			resp.GetMetaStorageInfos(),
+			resp.GetLocalMetaStorageInfo(),
+		)
+		break
+	case rpc.SqlType_SimpleQuery,
+		rpc.SqlType_DownsampleQuery,
+		rpc.SqlType_ValueFilterQuery:
+		dataSet.QueryDataSet = NewQueryDataSet(
+			resp.GetPaths(),
+			resp.GetDataTypeList(),
+			resp.GetQueryDataSet().GetTimestamps(),
+			resp.GetQueryDataSet().GetValuesList(),
+			resp.GetQueryDataSet().GetBitmapList(),
+		)
+		break
+	case rpc.SqlType_AggregateQuery:
+		if resp.GetAggregateType() == rpc.AggregateType_LAST {
+			dataSet.LastQueryDataSet = NewLastQueryDataSet(
+				resp.GetPaths(),
+				resp.GetTimestamps(),
+				resp.GetValuesList(),
+				resp.GetDataTypeList(),
+			)
+		} else {
+			dataSet.AggregateQueryDataSet = NewAggregateQueryDataSet(
+				resp.GetPaths(),
+				resp.GetTimestamps(),
+				resp.GetValuesList(),
+				resp.GetDataTypeList(),
+				resp.GetAggregateType(),
+			)
+		}
+		break
+	}
+
+	return dataSet
+}
+
+func (s *SQLDataSet) GetParseErrorMsg() string {
+	return s.ParseErrorMsg
+}
+
+func (s *SQLDataSet) IsQuery() bool {
+	return s.Type == rpc.SqlType_SimpleQuery ||
+		s.Type == rpc.SqlType_AggregateQuery ||
+		s.Type == rpc.SqlType_DownsampleQuery ||
+		s.Type == rpc.SqlType_ValueFilterQuery
+}
+
+func (s *SQLDataSet) GetReplicaNum() int32 {
+	return s.ReplicaNum
+}
+
+func (s *SQLDataSet) GetPointsNum() int64 {
+	return s.PointsNum
+}
+
+func (s *SQLDataSet) GetTimeSeries() []*TimeSeries {
+	return s.TimeSeries
+}
+
+func (s *SQLDataSet) GetClusterInfo() *ClusterInfo {
+	return s.ClusterInfo
+}
+
+func (s *SQLDataSet) GetQueryDataSet() *QueryDataSet {
+	return s.QueryDataSet
+}
+
+func (s *SQLDataSet) GetLastQueryDataSet() *LastQueryDataSet {
+	return s.LastQueryDataSet
+}
+
+func (s *SQLDataSet) GetAggregateQueryDataSet() *AggregateQueryDataSet {
+	return s.AggregateQueryDataSet
 }
