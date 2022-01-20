@@ -758,38 +758,6 @@ func (s *Session) Query(paths []string, startTime, endTime int64) (*QueryDataSet
 	return ret, nil
 }
 
-func (s *Session) ValueFilterQuery(paths []string, startTime, endTime int64, expression string) (*QueryDataSet, error) {
-	req := rpc.ValueFilterQueryReq{
-		SessionId:         s.sessionId,
-		Paths:             s.mergeAndSortPaths(paths),
-		StartTime:         startTime,
-		EndTime:           endTime,
-		BooleanExpression: expression,
-	}
-
-	resp, err := s.client.ValueFilterQuery(context.Background(), &req)
-	if err != nil {
-		return nil, err
-	} else if resp == nil {
-		return nil, errors.New("value filter query data resp is nil")
-	}
-
-	err = s.verifyStatus(resp.GetStatus())
-	if err != nil {
-		return nil, err
-	}
-
-	rawDataSet := resp.GetQueryDataSet()
-	ret := NewQueryDataSet(
-		resp.GetPaths(),
-		resp.GetDataTypeList(),
-		rawDataSet.GetTimestamps(),
-		rawDataSet.GetValuesList(),
-		rawDataSet.GetBitmapList(),
-	)
-	return ret, nil
-}
-
 func (s *Session) DownSampleQuery(paths []string, startTime, endTime int64, aggregateType rpc.AggregateType, precision int64) (*QueryDataSet, error) {
 	req := rpc.DownsampleQueryReq{
 		SessionId:     s.sessionId,
@@ -854,7 +822,7 @@ func (s *Session) AggregateQuery(paths []string, startTime, endTime int64, aggre
 	return ret, nil
 }
 
-func (s *Session) LastQuery(paths []string, startTime int64) (*LastQueryDataSet, error) {
+func (s *Session) LastQuery(paths []string, startTime int64) (*QueryDataSet, error) {
 	req := rpc.LastQueryReq{
 		SessionId: s.sessionId,
 		Paths:     s.mergeAndSortPaths(paths),
@@ -873,11 +841,13 @@ func (s *Session) LastQuery(paths []string, startTime int64) (*LastQueryDataSet,
 		return nil, err
 	}
 
-	ret := NewLastQueryDataSet(
+	rawDataSet := resp.GetQueryDataSet()
+	ret := NewQueryDataSet(
 		resp.GetPaths(),
-		resp.GetTimestamps(),
-		resp.GetValuesList(),
 		resp.GetDataTypeList(),
+		rawDataSet.GetTimestamps(),
+		rawDataSet.GetValuesList(),
+		rawDataSet.GetBitmapList(),
 	)
 	return ret, nil
 }

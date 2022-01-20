@@ -50,8 +50,6 @@ func main() {
 
 	// 查询全部数据
 	queryAllData()
-	// 值过滤查询
-	valueFilterQuery()
 	// 降采样查询
 	downSampleQuery()
 	// 聚合查询
@@ -185,17 +183,6 @@ func queryAllData() {
 	fmt.Println("query all data:")
 	paths := []string{allPaths}
 	dataSet, err := session.Query(paths, 0, math.MaxInt64)
-	if err != nil {
-		log.Fatal(err)
-	}
-	dataSet.PrintDataSet()
-}
-
-func valueFilterQuery() {
-	fmt.Println("value filter query:")
-	paths := []string{allPaths}
-	expression := s2 + " > 6" + " && " + s3 + " < 9"
-	dataSet, err := session.ValueFilterQuery(paths, 0, math.MaxInt64, expression)
 	if err != nil {
 		log.Fatal(err)
 	}
