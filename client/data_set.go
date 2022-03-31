@@ -98,54 +98,11 @@ func (s *AggregateQueryDataSet) PrintDataSet() {
 	fmt.Println()
 }
 
-type Point struct {
-	Path      string
-	Type      rpc.DataType
-	Timestamp int64
-	value     interface{}
-}
-
-func NewPoint(path string, dataType rpc.DataType, timestamp int64, value interface{}) Point {
-	return Point{
-		Path:      path,
-		Type:      dataType,
-		Timestamp: timestamp,
-		value:     value,
-	}
-}
-
-type LastQueryDataSet struct {
-	Points []Point
-}
-
-func NewLastQueryDataSet(paths []string, timeBuffer, valuesBuffer []byte, types []rpc.DataType) *LastQueryDataSet {
-	timestamps := GetLongArrayFromBytes(timeBuffer)
-	values := GetValueByDataTypeList(valuesBuffer, types)
-
-	var points []Point
-	for i := range paths {
-		points = append(points, NewPoint(paths[i], types[i], timestamps[i], values[i]))
-	}
-	return &LastQueryDataSet{Points: points}
-}
-
-func (s *LastQueryDataSet) PrintDataSet() {
-	fmt.Println("Start print aggregate data set")
-	fmt.Println("-------------------------------------")
-	fmt.Println("Time Series Value")
-	for _, point := range s.Points {
-		fmt.Println(point.Timestamp, " ", point.Path, " ", point.value)
-	}
-	fmt.Println("-------------------------------------")
-	fmt.Println()
-}
-
 type SQLDataSet struct {
 	Type          rpc.SqlType
 	ParseErrorMsg string
 
 	QueryDataSet          *QueryDataSet
-	LastQueryDataSet      *LastQueryDataSet
 	AggregateQueryDataSet *AggregateQueryDataSet
 
 	TimeSeries  []*TimeSeries
@@ -195,22 +152,13 @@ func NewSQLDataSet(resp *rpc.ExecuteSqlResp) *SQLDataSet {
 		)
 		break
 	case rpc.SqlType_AggregateQuery:
-		if resp.GetAggregateType() == rpc.AggregateType_LAST {
-			dataSet.LastQueryDataSet = NewLastQueryDataSet(
-				resp.GetPaths(),
-				resp.GetTimestamps(),
-				resp.GetValuesList(),
-				resp.GetDataTypeList(),
-			)
-		} else {
-			dataSet.AggregateQueryDataSet = NewAggregateQueryDataSet(
-				resp.GetPaths(),
-				resp.GetTimestamps(),
-				resp.GetValuesList(),
-				resp.GetDataTypeList(),
-				resp.GetAggregateType(),
-			)
-		}
+		dataSet.AggregateQueryDataSet = NewAggregateQueryDataSet(
+			resp.GetPaths(),
+			resp.GetTimestamps(),
+			resp.GetValuesList(),
+			resp.GetDataTypeList(),
+			resp.GetAggregateType(),
+		)
 		break
 	}
 
@@ -246,10 +194,6 @@ func (s *SQLDataSet) GetClusterInfo() *ClusterInfo {
 
 func (s *SQLDataSet) GetQueryDataSet() *QueryDataSet {
 	return s.QueryDataSet
-}
-
-func (s *SQLDataSet) GetLastQueryDataSet() *LastQueryDataSet {
-	return s.LastQueryDataSet
 }
 
 func (s *SQLDataSet) GetAggregateQueryDataSet() *AggregateQueryDataSet {

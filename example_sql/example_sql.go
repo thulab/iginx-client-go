@@ -146,7 +146,7 @@ func valueFilterQuery() {
 func downSampleQuery() {
 	fmt.Println("downSample query:")
 
-	sql := "SELECT MAX(b), MAX(e) FROM test.go WHERE TIME IN [0, 10) GROUP BY 5ms;"
+	sql := "SELECT MAX(b), MAX(e) FROM test.go GROUP [0, 10) BY 5ms;"
 	resp, err := session.ExecuteSQL(sql)
 	if err != nil {
 		log.Fatal(err)
@@ -158,7 +158,7 @@ func downSampleQuery() {
 func aggregateQuery() {
 	fmt.Println("aggregate query:")
 
-	sql := "SELECT MAX(a), MAX(b) FROM test.go WHERE TIME IN [0, 10);"
+	sql := "SELECT MAX(a), MAX(b) FROM test.go WHERE TIME >= 0 AND TIME < 10;"
 	resp, err := session.ExecuteSQL(sql)
 	if err != nil {
 		log.Fatal(err)
@@ -170,19 +170,19 @@ func aggregateQuery() {
 func lastQuery() {
 	fmt.Println("last query:")
 
-	sql := "SELECT LAST(a), LAST(b), LAST(c) FROM test.go WHERE TIME IN [5, INF);"
+	sql := "SELECT LAST(a), LAST(b), LAST(c) FROM test.go WHERE TIME >= 5;"
 	resp, err := session.ExecuteSQL(sql)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	resp.GetLastQueryDataSet().PrintDataSet()
+	resp.GetQueryDataSet().PrintDataSet()
 }
 
 func deleteData() {
 	fmt.Println("deleteData")
 
-	sql := "DELETE FROM test.go.* WHERE TIME IN [10, 15);"
+	sql := "DELETE FROM test.go.* WHERE TIME >= 10 AND TIME < 15;"
 	_, err := session.ExecuteSQL(sql)
 	if err != nil {
 		log.Fatal(err)
