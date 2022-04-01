@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"errors"
+	"math"
 	"net"
 	"sort"
 	"strconv"
@@ -871,6 +872,83 @@ func (s *Session) ExecuteSQL(sql string) (*SQLDataSet, error) {
 	}
 
 	return NewSQLDataSet(resp), err
+}
+
+func (s *Session) ExecuteQuery(statement string) (*StreamDataSet, error) {
+	return s.ExecuteQueryWithFetchSize(statement, math.MaxInt32)
+}
+
+func (s *Session) ExecuteQueryWithFetchSize(statement string, fetchSize int32) (*StreamDataSet, error) {
+	req := rpc.ExecuteStatementReq{
+		SessionId: s.sessionId,
+		Statement: statement,
+		FetchSize: &fetchSize,
+	}
+
+	resp, err := s.client.ExecuteStatement(context.Background(), &req)
+	if err != nil {
+		return nil, err
+	} else if resp == nil {
+		return nil, errors.New("execute statement resp is nil")
+	}
+
+	err = s.verifyStatus(resp.GetStatus())
+	if err != nil {
+		return nil, err
+	}
+
+	ret := NewStreamDataSet(
+		s,
+		fetchSize,
+		resp.GetQueryId(),
+		resp.GetColumns(),
+		resp.GetDataTypeList(),
+		resp.GetQueryDataSet().GetValuesList(),
+		resp.GetQueryDataSet().GetBitmapList(),
+	)
+
+	return ret, nil
+}
+
+func (s *Session) fetchResult(queryId int64, fetchSize int32) (*rpc.QueryDataSetV2, bool, error) {
+	req := rpc.FetchResultsReq{
+		SessionId: s.sessionId,
+		QueryId:   queryId,
+		FetchSize: &fetchSize,
+	}
+
+	resp, err := s.client.FetchResults(context.Background(), &req)
+	if err != nil {
+		return nil, false, err
+	} else if resp == nil {
+		return nil, false, errors.New("execute statement resp is nil")
+	}
+
+	err = s.verifyStatus(resp.GetStatus())
+	if err != nil {
+		return nil, false, err
+	}
+
+	return resp.GetQueryDataSet(), resp.GetHasMoreResults(), nil
+}
+
+func (s *Session) closeQuery(queryId int64) error {
+	req := rpc.CloseStatementReq{
+		SessionId: s.sessionId,
+		QueryId:   queryId,
+	}
+
+	status, err := s.client.CloseStatement(context.Background(), &req)
+	if err != nil {
+		return err
+	}
+
+	err = s.verifyStatus(status)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *Session) verifyStatus(status *rpc.Status) error {
