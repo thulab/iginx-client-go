@@ -53,7 +53,7 @@ func (s *QueryDataSet) PrintDataSet() {
 	}
 	fmt.Println()
 	for i := range s.Values {
-		if i < len(s.Timestamps) {
+		if len(s.Timestamps) != 0 && i < len(s.Timestamps) {
 			fmt.Print(s.Timestamps[i], " ")
 		}
 		for j := range s.Values[i] {
@@ -225,8 +225,7 @@ type SQLDataSet struct {
 	Type          rpc.SqlType
 	ParseErrorMsg string
 
-	QueryDataSet          *QueryDataSet
-	AggregateQueryDataSet *AggregateQueryDataSet
+	QueryDataSet *QueryDataSet
 
 	TimeSeries  []*TimeSeries
 	ReplicaNum  int32

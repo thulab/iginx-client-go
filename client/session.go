@@ -320,13 +320,16 @@ func (s *Session) BatchDeleteTimeSeries(paths []string) error {
 	return nil
 }
 
-func (s *Session) InsertRowRecords(paths []string, timestamps []int64, valueList [][]interface{}, dataTypeList []rpc.DataType) error {
+func (s *Session) InsertRowRecords(paths []string, timestamps []int64, valueList [][]interface{}, dataTypeList []rpc.DataType, tagsList []map[string]string) error {
 	if paths == nil || timestamps == nil || valueList == nil || dataTypeList == nil ||
 		len(paths) == 0 || len(timestamps) == 0 || len(valueList) == 0 || len(dataTypeList) == 0 {
 		return errors.New("invalid insert request")
 	}
 	if len(paths) != len(dataTypeList) {
 		return errors.New("the sizes of paths and dataTypeList should be equal")
+	}
+	if tagsList != nil && len(paths) != len(tagsList) {
+		return errors.New("the sizes of paths and tagsList should be equal")
 	}
 	if len(timestamps) != len(valueList) {
 		return errors.New("the sizes of timestamps and valuesList should be equal")
@@ -360,6 +363,13 @@ func (s *Session) InsertRowRecords(paths []string, timestamps []int64, valueList
 	var sortedDataTypeList []rpc.DataType
 	for i := range pathIndex {
 		sortedDataTypeList = append(sortedDataTypeList, dataTypeList[pathIndex[i]])
+	}
+	// 重排tagKV
+	var sortedTagsList []map[string]string
+	if tagsList != nil {
+		for i := range pathIndex {
+			sortedTagsList = append(sortedTagsList, tagsList[pathIndex[i]])
+		}
 	}
 	// 重排数据
 	for i := range sortedValueList {
@@ -395,13 +405,13 @@ func (s *Session) InsertRowRecords(paths []string, timestamps []int64, valueList
 	}
 
 	req := rpc.InsertRowRecordsReq{
-		SessionId:      s.sessionId,
-		Paths:          paths,
-		Timestamps:     timeBytes,
-		ValuesList:     valueBufferList,
-		BitmapList:     bitmapBufferList,
-		DataTypeList:   sortedDataTypeList,
-		AttributesList: nil,
+		SessionId:    s.sessionId,
+		Paths:        paths,
+		Timestamps:   timeBytes,
+		ValuesList:   valueBufferList,
+		BitmapList:   bitmapBufferList,
+		DataTypeList: sortedDataTypeList,
+		TagsList:     sortedTagsList,
 	}
 
 	status, err := s.client.InsertRowRecords(context.Background(), &req)
@@ -417,13 +427,16 @@ func (s *Session) InsertRowRecords(paths []string, timestamps []int64, valueList
 	return nil
 }
 
-func (s *Session) InsertNonAlignedRowRecords(paths []string, timestamps []int64, valueList [][]interface{}, dataTypeList []rpc.DataType) error {
+func (s *Session) InsertNonAlignedRowRecords(paths []string, timestamps []int64, valueList [][]interface{}, dataTypeList []rpc.DataType, tagsList []map[string]string) error {
 	if paths == nil || timestamps == nil || valueList == nil || dataTypeList == nil ||
 		len(paths) == 0 || len(timestamps) == 0 || len(valueList) == 0 || len(dataTypeList) == 0 {
 		return errors.New("invalid insert request")
 	}
 	if len(paths) != len(dataTypeList) {
 		return errors.New("the sizes of paths and dataTypeList should be equal")
+	}
+	if tagsList != nil && len(paths) != len(tagsList) {
+		return errors.New("the sizes of paths and tagsList should be equal")
 	}
 	if len(timestamps) != len(valueList) {
 		return errors.New("the sizes of timestamps and valuesList should be equal")
@@ -457,6 +470,13 @@ func (s *Session) InsertNonAlignedRowRecords(paths []string, timestamps []int64,
 	var sortedDataTypeList []rpc.DataType
 	for i := range pathIndex {
 		sortedDataTypeList = append(sortedDataTypeList, dataTypeList[pathIndex[i]])
+	}
+	// 重排tagKV
+	var sortedTagsList []map[string]string
+	if tagsList != nil {
+		for i := range pathIndex {
+			sortedTagsList = append(sortedTagsList, tagsList[pathIndex[i]])
+		}
 	}
 	// 重排数据
 	for i := range sortedValueList {
@@ -492,13 +512,13 @@ func (s *Session) InsertNonAlignedRowRecords(paths []string, timestamps []int64,
 	}
 
 	req := rpc.InsertNonAlignedRowRecordsReq{
-		SessionId:      s.sessionId,
-		Paths:          paths,
-		Timestamps:     timeBytes,
-		ValuesList:     valueBufferList,
-		BitmapList:     bitmapBufferList,
-		DataTypeList:   sortedDataTypeList,
-		AttributesList: nil,
+		SessionId:    s.sessionId,
+		Paths:        paths,
+		Timestamps:   timeBytes,
+		ValuesList:   valueBufferList,
+		BitmapList:   bitmapBufferList,
+		DataTypeList: sortedDataTypeList,
+		TagsList:     sortedTagsList,
 	}
 
 	status, err := s.client.InsertNonAlignedRowRecords(context.Background(), &req)
@@ -514,13 +534,16 @@ func (s *Session) InsertNonAlignedRowRecords(paths []string, timestamps []int64,
 	return nil
 }
 
-func (s *Session) InsertColumnRecords(paths []string, timestamps []int64, valueList [][]interface{}, dataTypeList []rpc.DataType) error {
+func (s *Session) InsertColumnRecords(paths []string, timestamps []int64, valueList [][]interface{}, dataTypeList []rpc.DataType, tagsList []map[string]string) error {
 	if paths == nil || timestamps == nil || valueList == nil || dataTypeList == nil ||
 		len(paths) == 0 || len(timestamps) == 0 || len(valueList) == 0 || len(dataTypeList) == 0 {
 		return errors.New("invalid insert request")
 	}
 	if len(paths) != len(dataTypeList) {
 		return errors.New("the sizes of paths and dataTypeList should be equal")
+	}
+	if tagsList != nil && len(paths) != len(tagsList) {
+		return errors.New("the sizes of paths and tagsList should be equal")
 	}
 	if len(paths) != len(valueList) {
 		return errors.New("the sizes of paths and valuesList should be equal")
@@ -559,6 +582,13 @@ func (s *Session) InsertColumnRecords(paths []string, timestamps []int64, valueL
 	for i := range pathIndex {
 		sortedValueList = append(sortedValueList, valueList[pathIndex[i]])
 		sortedDataTypeList = append(sortedDataTypeList, dataTypeList[pathIndex[i]])
+	}
+	// 重排tagKV
+	var sortedTagsList []map[string]string
+	if tagsList != nil {
+		for i := range pathIndex {
+			sortedTagsList = append(sortedTagsList, tagsList[pathIndex[i]])
+		}
 	}
 	// 压缩数据
 	var valueBufferList, bitmapBufferList [][]byte
@@ -586,13 +616,13 @@ func (s *Session) InsertColumnRecords(paths []string, timestamps []int64, valueL
 	}
 
 	req := rpc.InsertColumnRecordsReq{
-		SessionId:      s.sessionId,
-		Paths:          paths,
-		Timestamps:     timeBytes,
-		ValuesList:     valueBufferList,
-		BitmapList:     bitmapBufferList,
-		DataTypeList:   sortedDataTypeList,
-		AttributesList: nil,
+		SessionId:    s.sessionId,
+		Paths:        paths,
+		Timestamps:   timeBytes,
+		ValuesList:   valueBufferList,
+		BitmapList:   bitmapBufferList,
+		DataTypeList: sortedDataTypeList,
+		TagsList:     sortedTagsList,
 	}
 
 	status, err := s.client.InsertColumnRecords(context.Background(), &req)
@@ -608,13 +638,16 @@ func (s *Session) InsertColumnRecords(paths []string, timestamps []int64, valueL
 	return nil
 }
 
-func (s *Session) InsertNonAlignedColumnRecords(paths []string, timestamps []int64, valueList [][]interface{}, dataTypeList []rpc.DataType) error {
+func (s *Session) InsertNonAlignedColumnRecords(paths []string, timestamps []int64, valueList [][]interface{}, dataTypeList []rpc.DataType, tagsList []map[string]string) error {
 	if paths == nil || timestamps == nil || valueList == nil || dataTypeList == nil ||
 		len(paths) == 0 || len(timestamps) == 0 || len(valueList) == 0 || len(dataTypeList) == 0 {
 		return errors.New("invalid insert request")
 	}
 	if len(paths) != len(dataTypeList) {
 		return errors.New("the sizes of paths and dataTypeList should be equal")
+	}
+	if tagsList != nil && len(paths) != len(tagsList) {
+		return errors.New("the sizes of paths and tagsList should be equal")
 	}
 	if len(paths) != len(valueList) {
 		return errors.New("the sizes of paths and valuesList should be equal")
@@ -654,6 +687,13 @@ func (s *Session) InsertNonAlignedColumnRecords(paths []string, timestamps []int
 		sortedValueList = append(sortedValueList, valueList[pathIndex[i]])
 		sortedDataTypeList = append(sortedDataTypeList, dataTypeList[pathIndex[i]])
 	}
+	// 重排tagKV
+	var sortedTagsList []map[string]string
+	if tagsList != nil {
+		for i := range pathIndex {
+			sortedTagsList = append(sortedTagsList, tagsList[pathIndex[i]])
+		}
+	}
 	// 压缩数据
 	var valueBufferList, bitmapBufferList [][]byte
 	for i := range sortedValueList {
@@ -680,13 +720,13 @@ func (s *Session) InsertNonAlignedColumnRecords(paths []string, timestamps []int
 	}
 
 	req := rpc.InsertNonAlignedColumnRecordsReq{
-		SessionId:      s.sessionId,
-		Paths:          paths,
-		Timestamps:     timeBytes,
-		ValuesList:     valueBufferList,
-		BitmapList:     bitmapBufferList,
-		DataTypeList:   sortedDataTypeList,
-		AttributesList: nil,
+		SessionId:    s.sessionId,
+		Paths:        paths,
+		Timestamps:   timeBytes,
+		ValuesList:   valueBufferList,
+		BitmapList:   bitmapBufferList,
+		DataTypeList: sortedDataTypeList,
+		TagsList:     sortedTagsList,
 	}
 
 	status, err := s.client.InsertNonAlignedColumnRecords(context.Background(), &req)
@@ -728,12 +768,13 @@ func (s *Session) BatchDeleteData(paths []string, startTime, endTime int64) erro
 	return nil
 }
 
-func (s *Session) Query(paths []string, startTime, endTime int64) (*QueryDataSet, error) {
+func (s *Session) Query(paths []string, startTime, endTime int64, tagList map[string][]string) (*QueryDataSet, error) {
 	req := rpc.QueryDataReq{
 		SessionId: s.sessionId,
 		Paths:     s.mergeAndSortPaths(paths),
 		StartTime: startTime,
 		EndTime:   endTime,
+		TagsList:  tagList,
 	}
 
 	resp, err := s.client.QueryData(context.Background(), &req)
@@ -759,7 +800,7 @@ func (s *Session) Query(paths []string, startTime, endTime int64) (*QueryDataSet
 	return ret, nil
 }
 
-func (s *Session) DownSampleQuery(paths []string, startTime, endTime int64, aggregateType rpc.AggregateType, precision int64) (*QueryDataSet, error) {
+func (s *Session) DownSampleQuery(paths []string, startTime, endTime int64, aggregateType rpc.AggregateType, precision int64, tagList map[string][]string) (*QueryDataSet, error) {
 	req := rpc.DownsampleQueryReq{
 		SessionId:     s.sessionId,
 		Paths:         s.mergeAndSortPaths(paths),
@@ -767,6 +808,7 @@ func (s *Session) DownSampleQuery(paths []string, startTime, endTime int64, aggr
 		EndTime:       endTime,
 		AggregateType: aggregateType,
 		Precision:     precision,
+		TagsList:      tagList,
 	}
 
 	resp, err := s.client.DownsampleQuery(context.Background(), &req)
@@ -792,13 +834,14 @@ func (s *Session) DownSampleQuery(paths []string, startTime, endTime int64, aggr
 	return ret, nil
 }
 
-func (s *Session) AggregateQuery(paths []string, startTime, endTime int64, aggregateType rpc.AggregateType) (*AggregateQueryDataSet, error) {
+func (s *Session) AggregateQuery(paths []string, startTime, endTime int64, aggregateType rpc.AggregateType, tagList map[string][]string) (*AggregateQueryDataSet, error) {
 	req := rpc.AggregateQueryReq{
 		SessionId:     s.sessionId,
 		Paths:         s.mergeAndSortPaths(paths),
 		StartTime:     startTime,
 		EndTime:       endTime,
 		AggregateType: aggregateType,
+		TagsList:      tagList,
 	}
 
 	resp, err := s.client.AggregateQuery(context.Background(), &req)
@@ -823,11 +866,12 @@ func (s *Session) AggregateQuery(paths []string, startTime, endTime int64, aggre
 	return ret, nil
 }
 
-func (s *Session) LastQuery(paths []string, startTime int64) (*QueryDataSet, error) {
+func (s *Session) LastQuery(paths []string, startTime int64, tagList map[string][]string) (*QueryDataSet, error) {
 	req := rpc.LastQueryReq{
 		SessionId: s.sessionId,
 		Paths:     s.mergeAndSortPaths(paths),
 		StartTime: startTime,
+		TagsList:  tagList,
 	}
 
 	resp, err := s.client.LastQuery(context.Background(), &req)
