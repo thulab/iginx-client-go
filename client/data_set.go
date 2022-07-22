@@ -44,13 +44,17 @@ func NewQueryDataSet(paths []string, types []rpc.DataType, timeBuffer []byte, va
 func (s *QueryDataSet) PrintDataSet() {
 	fmt.Println("Start print data set")
 	fmt.Println("-------------------------------------")
-	fmt.Print("Time ")
+	if len(s.Timestamps) != 0 {
+		fmt.Print("Time ")
+	}
 	for i := range s.Paths {
 		fmt.Print(s.Paths[i], " ")
 	}
 	fmt.Println()
 	for i := range s.Values {
-		fmt.Print(s.Timestamps[i], " ")
+		if len(s.Timestamps) != 0 {
+			fmt.Print(s.Timestamps[i], " ")
+		}
 		for j := range s.Values[i] {
 			fmt.Print(s.Values[i][j], " ")
 		}
@@ -102,8 +106,7 @@ type SQLDataSet struct {
 	Type          rpc.SqlType
 	ParseErrorMsg string
 
-	QueryDataSet          *QueryDataSet
-	AggregateQueryDataSet *AggregateQueryDataSet
+	QueryDataSet *QueryDataSet
 
 	TimeSeries  []*TimeSeries
 	ReplicaNum  int32
@@ -140,24 +143,13 @@ func NewSQLDataSet(resp *rpc.ExecuteSqlResp) *SQLDataSet {
 			resp.GetLocalMetaStorageInfo(),
 		)
 		break
-	case rpc.SqlType_SimpleQuery,
-		rpc.SqlType_DownsampleQuery,
-		rpc.SqlType_ValueFilterQuery:
+	case rpc.SqlType_Query:
 		dataSet.QueryDataSet = NewQueryDataSet(
 			resp.GetPaths(),
 			resp.GetDataTypeList(),
 			resp.GetQueryDataSet().GetTimestamps(),
 			resp.GetQueryDataSet().GetValuesList(),
 			resp.GetQueryDataSet().GetBitmapList(),
-		)
-		break
-	case rpc.SqlType_AggregateQuery:
-		dataSet.AggregateQueryDataSet = NewAggregateQueryDataSet(
-			resp.GetPaths(),
-			resp.GetTimestamps(),
-			resp.GetValuesList(),
-			resp.GetDataTypeList(),
-			resp.GetAggregateType(),
 		)
 		break
 	}
@@ -170,10 +162,7 @@ func (s *SQLDataSet) GetParseErrorMsg() string {
 }
 
 func (s *SQLDataSet) IsQuery() bool {
-	return s.Type == rpc.SqlType_SimpleQuery ||
-		s.Type == rpc.SqlType_AggregateQuery ||
-		s.Type == rpc.SqlType_DownsampleQuery ||
-		s.Type == rpc.SqlType_ValueFilterQuery
+	return s.Type == rpc.SqlType_Query
 }
 
 func (s *SQLDataSet) GetReplicaNum() int32 {
@@ -194,8 +183,4 @@ func (s *SQLDataSet) GetClusterInfo() *ClusterInfo {
 
 func (s *SQLDataSet) GetQueryDataSet() *QueryDataSet {
 	return s.QueryDataSet
-}
-
-func (s *SQLDataSet) GetAggregateQueryDataSet() *AggregateQueryDataSet {
-	return s.AggregateQueryDataSet
 }

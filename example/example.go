@@ -19,7 +19,15 @@ var (
 	s5 = "test.go.e"
 	s6 = "test.go.f"
 
-	allPaths = "test.go.*"
+	tagS1 = "test.tag.a"
+	tagS2 = "test.tag.b"
+	tagS3 = "test.tag.c"
+	tagS4 = "test.tag.d"
+	tagS5 = "test.tag.e"
+	tagS6 = "test.tag.f"
+
+	allPaths    = "test.go.*"
+	allTagPaths = "test.tag.*"
 )
 
 func main() {
@@ -45,6 +53,9 @@ func main() {
 	insertColumnData()
 	insertNonAlignedColumnRecords()
 
+	// 插入tagKV数据
+	insertTagKVRowData()
+
 	// 查询时间序列
 	showTimeSeries()
 
@@ -56,6 +67,8 @@ func main() {
 	aggregateQuery()
 	// last 查询
 	lastQuery()
+	// tagKV 查询
+	simpleQueryWithTagKV()
 
 	// 删除部分数据
 	deleteData()
@@ -104,7 +117,7 @@ func insertRowData() {
 		{"seven", int32(7), int64(7), float32(7.1), float64(7.1), nil},
 	}
 	types := []rpc.DataType{rpc.DataType_BINARY, rpc.DataType_INTEGER, rpc.DataType_LONG, rpc.DataType_FLOAT, rpc.DataType_DOUBLE, rpc.DataType_BOOLEAN}
-	err := session.InsertRowRecords(path, timestamps, values, types)
+	err := session.InsertRowRecords(path, timestamps, values, types, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -116,11 +129,11 @@ func insertNonAlignedRowRecords() {
 	path := []string{s1, s2, s3, s4, s5, s6}
 	timestamps := []int64{8, 9}
 	values := [][]interface{}{
-		{"one", int32(8), int64(8), float32(8.1), float64(8.1), false},
-		{"two", int32(9), int64(9), float32(9.1), float64(9.1), true},
+		{"eight", int32(8), int64(8), float32(8.1), float64(8.1), false},
+		{"nine", int32(9), int64(9), float32(9.1), float64(9.1), true},
 	}
 	types := []rpc.DataType{rpc.DataType_BINARY, rpc.DataType_INTEGER, rpc.DataType_LONG, rpc.DataType_FLOAT, rpc.DataType_DOUBLE, rpc.DataType_BOOLEAN}
-	err := session.InsertNonAlignedRowRecords(path, timestamps, values, types)
+	err := session.InsertNonAlignedRowRecords(path, timestamps, values, types, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -140,7 +153,7 @@ func insertColumnData() {
 		{false, true},
 	}
 	types := []rpc.DataType{rpc.DataType_BINARY, rpc.DataType_INTEGER, rpc.DataType_LONG, rpc.DataType_FLOAT, rpc.DataType_DOUBLE, rpc.DataType_BOOLEAN}
-	err := session.InsertColumnRecords(path, timestamps, values, types)
+	err := session.InsertColumnRecords(path, timestamps, values, types, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -160,7 +173,33 @@ func insertNonAlignedColumnRecords() {
 		{false, true},
 	}
 	types := []rpc.DataType{rpc.DataType_BINARY, rpc.DataType_INTEGER, rpc.DataType_LONG, rpc.DataType_FLOAT, rpc.DataType_DOUBLE, rpc.DataType_BOOLEAN}
-	err := session.InsertNonAlignedColumnRecords(paths, timestamps, values, types)
+	err := session.InsertNonAlignedColumnRecords(paths, timestamps, values, types, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println()
+}
+
+func insertTagKVRowData() {
+	fmt.Println("insertTagKVRowData")
+	path := []string{tagS1, tagS2, tagS3, tagS4, tagS5, tagS6}
+	timestamps := []int64{14, 15, 16}
+	values := [][]interface{}{
+		{"fourteen", int32(14), int64(14), float32(14.1), float64(14.1), false},
+		{"fifteen", int32(15), int64(15), float32(15.1), float64(15.1), true},
+		{"sixteen", int32(16), int64(16), float32(16.1), float64(16.1), false},
+	}
+	types := []rpc.DataType{rpc.DataType_BINARY, rpc.DataType_INTEGER, rpc.DataType_LONG, rpc.DataType_FLOAT, rpc.DataType_DOUBLE, rpc.DataType_BOOLEAN}
+	tagsList := []map[string]string{
+		{"k1": "v1", "k2": "v1"},
+		{"k1": "v2", "k2": "v2"},
+		{"k1": "v3", "k2": "v3"},
+		{"k1": "v4", "k2": "v4"},
+		{"k1": "v5", "k2": "v5"},
+		{"k1": "v6", "k2": "v6"},
+	}
+
+	err := session.InsertRowRecords(path, timestamps, values, types, tagsList)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -182,7 +221,7 @@ func showTimeSeries() {
 func queryAllData() {
 	fmt.Println("query all data:")
 	paths := []string{allPaths}
-	dataSet, err := session.Query(paths, 0, math.MaxInt64)
+	dataSet, err := session.Query(paths, 0, math.MaxInt64, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -192,7 +231,7 @@ func queryAllData() {
 func downSampleQuery() {
 	fmt.Println("downSample query:")
 	paths := []string{s2, s5}
-	dataSet, err := session.DownSampleQuery(paths, 0, 10, rpc.AggregateType_MAX, 5)
+	dataSet, err := session.DownSampleQuery(paths, 0, 10, rpc.AggregateType_MAX, 5, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -202,7 +241,7 @@ func downSampleQuery() {
 func aggregateQuery() {
 	fmt.Println("aggregate query:")
 	paths := []string{s1, s2}
-	dataSet, err := session.AggregateQuery(paths, 0, 10, rpc.AggregateType_MAX)
+	dataSet, err := session.AggregateQuery(paths, 0, 10, rpc.AggregateType_MAX, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -212,7 +251,21 @@ func aggregateQuery() {
 func lastQuery() {
 	fmt.Println("last query:")
 	paths := []string{s1, s2, s3}
-	dataSet, err := session.LastQuery(paths, 5)
+	dataSet, err := session.LastQuery(paths, 5, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	dataSet.PrintDataSet()
+}
+
+func simpleQueryWithTagKV() {
+	fmt.Println("query with tagKV:")
+	paths := []string{allTagPaths}
+	tagList := map[string][]string{
+		"k1": {"v1", "v3"},
+		"k2": {"v1"},
+	}
+	dataSet, err := session.Query(paths, 0, math.MaxInt64, tagList)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -240,7 +293,7 @@ func deleteTimeSeries() {
 
 func clearData() {
 	fmt.Println("clearData")
-	paths := []string{allPaths}
+	paths := []string{allPaths, allTagPaths}
 	err := session.BatchDeleteTimeSeries(paths)
 	if err != nil {
 		log.Fatal(err)

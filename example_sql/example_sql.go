@@ -164,7 +164,7 @@ func aggregateQuery() {
 		log.Fatal(err)
 	}
 
-	resp.GetAggregateQueryDataSet().PrintDataSet()
+	resp.GetQueryDataSet().PrintDataSet()
 }
 
 func lastQuery() {
