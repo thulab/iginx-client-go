@@ -2,6 +2,7 @@ package client
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/thulab/iginx-client-go/rpc"
 )
@@ -52,7 +53,7 @@ func (s *QueryDataSet) PrintDataSet() {
 	}
 	fmt.Println()
 	for i := range s.Values {
-		if len(s.Timestamps) != 0 {
+		if len(s.Timestamps) != 0 && i < len(s.Timestamps) {
 			fmt.Print(s.Timestamps[i], " ")
 		}
 		for j := range s.Values[i] {
@@ -95,6 +96,124 @@ func (s *AggregateQueryDataSet) PrintDataSet() {
 	fmt.Println()
 	for _, value := range s.Values {
 		fmt.Print(value, " ")
+	}
+	fmt.Println()
+
+	fmt.Println("-------------------------------------")
+	fmt.Println()
+}
+
+type StateType int32
+
+const (
+	HasMore StateType = 0
+	NoMore  StateType = 1
+	Unknown StateType = 2
+)
+
+type StreamDataSet struct {
+	session    *Session
+	fetchSize  int32
+	queryId    int64
+	columns    []string
+	types      []rpc.DataType
+	valuesList [][]byte
+	bitmapList [][]byte
+	index      int
+	state      StateType
+}
+
+func NewStreamDataSet(session *Session, fetchSize int32, queryId int64, columns []string, types []rpc.DataType, valuesList, bitmapList [][]byte) *StreamDataSet {
+	return &StreamDataSet{
+		session:    session,
+		fetchSize:  fetchSize,
+		queryId:    queryId,
+		columns:    columns,
+		types:      types,
+		valuesList: valuesList,
+		bitmapList: bitmapList,
+		index:      0,
+		state:      Unknown,
+	}
+}
+
+func (s *StreamDataSet) Close() error {
+	return s.session.closeQuery(s.queryId)
+}
+
+func (s *StreamDataSet) fetch() {
+	if s.index != len(s.bitmapList) { // 只有之前的被消费完才有可能继续取数据
+		return
+	}
+	s.bitmapList = nil
+	s.valuesList = nil
+	s.index = 0
+
+	dataSet, hasMore, err := s.session.fetchResult(s.queryId, s.fetchSize)
+	if err != nil {
+		log.Printf("fail to fetch stream data, err: %s\n", err)
+		s.state = Unknown
+	}
+	if dataSet != nil {
+		s.bitmapList = dataSet.GetBitmapList()
+		s.valuesList = dataSet.GetValuesList()
+	}
+	if hasMore {
+		s.state = HasMore
+	} else {
+		s.state = NoMore
+	}
+}
+
+func (s *StreamDataSet) HasMore() bool {
+	if s.index < len(s.valuesList) {
+		return true
+	}
+	s.bitmapList = nil
+	s.valuesList = nil
+	s.index = 0
+	if s.state == HasMore || s.state == Unknown {
+		s.fetch()
+	}
+	return s.valuesList != nil
+}
+
+func (s *StreamDataSet) NextRow() []interface{} {
+	if !s.HasMore() {
+		return nil
+	}
+	// nextRow 只会返回本地的 row，如果本地没有，在进行 hasMore 操作时候，就一定也已经取回来了
+	bitmapBuffer := s.bitmapList[s.index]
+	valuesBuffer := s.valuesList[s.index]
+	s.index++
+
+	var rowValues []interface{}
+	bitmap := NewBitmapWithBuf(len(s.types), bitmapBuffer)
+	for i := range s.types {
+		if notNil, _ := bitmap.Get(i); notNil {
+			var value interface{}
+			value, valuesBuffer = GetValueFromBytes(valuesBuffer, s.types[i])
+			rowValues = append(rowValues, value)
+		} else {
+			rowValues = append(rowValues, nil)
+		}
+	}
+	return rowValues
+}
+
+func (s *StreamDataSet) PrintDataSet() {
+	fmt.Println("Start print stream data set")
+	fmt.Println("-------------------------------------")
+
+	for _, column := range s.columns {
+		fmt.Print(column, " ")
+	}
+	fmt.Println()
+	for s.HasMore() {
+		values := s.NextRow()
+		for _, value := range values {
+			fmt.Print(value, " ")
+		}
 	}
 	fmt.Println()
 

@@ -33,6 +33,8 @@ func main() {
 
 	// 查询全部数据
 	queryAllData()
+	// 流式查询全部数据
+	queryAllDataWithStream()
 	// 值过滤查询
 	valueFilterQuery()
 	// 降采样查询
@@ -129,6 +131,18 @@ func queryAllData() {
 	}
 
 	resp.GetQueryDataSet().PrintDataSet()
+}
+
+func queryAllDataWithStream() {
+	fmt.Println("query all data with stream:")
+
+	sql := "SELECT * FROM test.go;"
+	resp, err := session.ExecuteQueryWithFetchSize(sql, 5)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	resp.PrintDataSet()
 }
 
 func valueFilterQuery() {
