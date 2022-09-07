@@ -275,7 +275,7 @@ func simpleQueryWithTagKV() {
 func deleteData() {
 	fmt.Println("deleteData")
 	paths := []string{allPaths}
-	err := session.BatchDeleteData(paths, 10, 15)
+	err := session.BatchDeleteData(paths, 10, 15, nil)
 	if err != nil {
 		log.Fatal(err)
 	}

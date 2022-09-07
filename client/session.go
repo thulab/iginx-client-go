@@ -742,17 +742,18 @@ func (s *Session) InsertNonAlignedColumnRecords(paths []string, timestamps []int
 	return nil
 }
 
-func (s *Session) DeleteData(path string, startTime, endTime int64) error {
+func (s *Session) DeleteData(path string, startTime, endTime int64, tagsList map[string][]string) error {
 	paths := []string{path}
-	return s.BatchDeleteData(paths, startTime, endTime)
+	return s.BatchDeleteData(paths, startTime, endTime, tagsList)
 }
 
-func (s *Session) BatchDeleteData(paths []string, startTime, endTime int64) error {
+func (s *Session) BatchDeleteData(paths []string, startTime, endTime int64, tagsList map[string][]string) error {
 	req := rpc.DeleteDataInColumnsReq{
 		SessionId: s.sessionId,
 		Paths:     paths,
 		StartTime: startTime,
 		EndTime:   endTime,
+		TagsList:  tagsList,
 	}
 
 	status, err := s.client.DeleteDataInColumns(context.Background(), &req)
