@@ -1505,6 +1505,7 @@ func (p *DeleteColumnsReq) String() string {
 //  - BitmapList
 //  - DataTypeList
 //  - TagsList
+//  - TimePrecision
 type InsertColumnRecordsReq struct {
   SessionId int64 `thrift:"sessionId,1,required" db:"sessionId" json:"sessionId"`
   Paths []string `thrift:"paths,2,required" db:"paths" json:"paths"`
@@ -1513,6 +1514,7 @@ type InsertColumnRecordsReq struct {
   BitmapList [][]byte `thrift:"bitmapList,5,required" db:"bitmapList" json:"bitmapList"`
   DataTypeList []DataType `thrift:"dataTypeList,6,required" db:"dataTypeList" json:"dataTypeList"`
   TagsList []map[string]string `thrift:"tagsList,7" db:"tagsList" json:"tagsList,omitempty"`
+  TimePrecision *string `thrift:"timePrecision,8" db:"timePrecision" json:"timePrecision,omitempty"`
 }
 
 func NewInsertColumnRecordsReq() *InsertColumnRecordsReq {
@@ -1548,8 +1550,19 @@ var InsertColumnRecordsReq_TagsList_DEFAULT []map[string]string
 func (p *InsertColumnRecordsReq) GetTagsList() []map[string]string {
   return p.TagsList
 }
+var InsertColumnRecordsReq_TimePrecision_DEFAULT string
+func (p *InsertColumnRecordsReq) GetTimePrecision() string {
+  if !p.IsSetTimePrecision() {
+    return InsertColumnRecordsReq_TimePrecision_DEFAULT
+  }
+return *p.TimePrecision
+}
 func (p *InsertColumnRecordsReq) IsSetTagsList() bool {
   return p.TagsList != nil
+}
+
+func (p *InsertColumnRecordsReq) IsSetTimePrecision() bool {
+  return p.TimePrecision != nil
 }
 
 func (p *InsertColumnRecordsReq) Read(ctx context.Context, iprot thrift.TProtocol) error {
@@ -1640,6 +1653,16 @@ func (p *InsertColumnRecordsReq) Read(ctx context.Context, iprot thrift.TProtoco
     case 7:
       if fieldTypeId == thrift.LIST {
         if err := p.ReadField7(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 8:
+      if fieldTypeId == thrift.STRING {
+        if err := p.ReadField8(ctx, iprot); err != nil {
           return err
         }
       } else {
@@ -1827,6 +1850,15 @@ var _val10 string
   return nil
 }
 
+func (p *InsertColumnRecordsReq)  ReadField8(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadString(ctx); err != nil {
+  return thrift.PrependError("error reading field 8: ", err)
+} else {
+  p.TimePrecision = &v
+}
+  return nil
+}
+
 func (p *InsertColumnRecordsReq) Write(ctx context.Context, oprot thrift.TProtocol) error {
   if err := oprot.WriteStructBegin(ctx, "InsertColumnRecordsReq"); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
@@ -1838,6 +1870,7 @@ func (p *InsertColumnRecordsReq) Write(ctx context.Context, oprot thrift.TProtoc
     if err := p.writeField5(ctx, oprot); err != nil { return err }
     if err := p.writeField6(ctx, oprot); err != nil { return err }
     if err := p.writeField7(ctx, oprot); err != nil { return err }
+    if err := p.writeField8(ctx, oprot); err != nil { return err }
   }
   if err := oprot.WriteFieldStop(ctx); err != nil {
     return thrift.PrependError("write field stop error: ", err) }
@@ -1968,6 +2001,18 @@ func (p *InsertColumnRecordsReq) writeField7(ctx context.Context, oprot thrift.T
   return err
 }
 
+func (p *InsertColumnRecordsReq) writeField8(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetTimePrecision() {
+    if err := oprot.WriteFieldBegin(ctx, "timePrecision", thrift.STRING, 8); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 8:timePrecision: ", p), err) }
+    if err := oprot.WriteString(ctx, string(*p.TimePrecision)); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T.timePrecision (8) field write error: ", p), err) }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 8:timePrecision: ", p), err) }
+  }
+  return err
+}
+
 func (p *InsertColumnRecordsReq) Equals(other *InsertColumnRecordsReq) bool {
   if p == other {
     return true
@@ -2005,6 +2050,12 @@ func (p *InsertColumnRecordsReq) Equals(other *InsertColumnRecordsReq) bool {
       if _tgt != _src16 { return false }
     }
   }
+  if p.TimePrecision != other.TimePrecision {
+    if p.TimePrecision == nil || other.TimePrecision == nil {
+      return false
+    }
+    if (*p.TimePrecision) != (*other.TimePrecision) { return false }
+  }
   return true
 }
 
@@ -2023,6 +2074,7 @@ func (p *InsertColumnRecordsReq) String() string {
 //  - BitmapList
 //  - DataTypeList
 //  - TagsList
+//  - TimePrecision
 type InsertNonAlignedColumnRecordsReq struct {
   SessionId int64 `thrift:"sessionId,1,required" db:"sessionId" json:"sessionId"`
   Paths []string `thrift:"paths,2,required" db:"paths" json:"paths"`
@@ -2031,6 +2083,7 @@ type InsertNonAlignedColumnRecordsReq struct {
   BitmapList [][]byte `thrift:"bitmapList,5,required" db:"bitmapList" json:"bitmapList"`
   DataTypeList []DataType `thrift:"dataTypeList,6,required" db:"dataTypeList" json:"dataTypeList"`
   TagsList []map[string]string `thrift:"tagsList,7" db:"tagsList" json:"tagsList,omitempty"`
+  TimePrecision *string `thrift:"timePrecision,8" db:"timePrecision" json:"timePrecision,omitempty"`
 }
 
 func NewInsertNonAlignedColumnRecordsReq() *InsertNonAlignedColumnRecordsReq {
@@ -2066,8 +2119,19 @@ var InsertNonAlignedColumnRecordsReq_TagsList_DEFAULT []map[string]string
 func (p *InsertNonAlignedColumnRecordsReq) GetTagsList() []map[string]string {
   return p.TagsList
 }
+var InsertNonAlignedColumnRecordsReq_TimePrecision_DEFAULT string
+func (p *InsertNonAlignedColumnRecordsReq) GetTimePrecision() string {
+  if !p.IsSetTimePrecision() {
+    return InsertNonAlignedColumnRecordsReq_TimePrecision_DEFAULT
+  }
+return *p.TimePrecision
+}
 func (p *InsertNonAlignedColumnRecordsReq) IsSetTagsList() bool {
   return p.TagsList != nil
+}
+
+func (p *InsertNonAlignedColumnRecordsReq) IsSetTimePrecision() bool {
+  return p.TimePrecision != nil
 }
 
 func (p *InsertNonAlignedColumnRecordsReq) Read(ctx context.Context, iprot thrift.TProtocol) error {
@@ -2158,6 +2222,16 @@ func (p *InsertNonAlignedColumnRecordsReq) Read(ctx context.Context, iprot thrif
     case 7:
       if fieldTypeId == thrift.LIST {
         if err := p.ReadField7(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 8:
+      if fieldTypeId == thrift.STRING {
+        if err := p.ReadField8(ctx, iprot); err != nil {
           return err
         }
       } else {
@@ -2345,6 +2419,15 @@ var _val23 string
   return nil
 }
 
+func (p *InsertNonAlignedColumnRecordsReq)  ReadField8(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadString(ctx); err != nil {
+  return thrift.PrependError("error reading field 8: ", err)
+} else {
+  p.TimePrecision = &v
+}
+  return nil
+}
+
 func (p *InsertNonAlignedColumnRecordsReq) Write(ctx context.Context, oprot thrift.TProtocol) error {
   if err := oprot.WriteStructBegin(ctx, "InsertNonAlignedColumnRecordsReq"); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
@@ -2356,6 +2439,7 @@ func (p *InsertNonAlignedColumnRecordsReq) Write(ctx context.Context, oprot thri
     if err := p.writeField5(ctx, oprot); err != nil { return err }
     if err := p.writeField6(ctx, oprot); err != nil { return err }
     if err := p.writeField7(ctx, oprot); err != nil { return err }
+    if err := p.writeField8(ctx, oprot); err != nil { return err }
   }
   if err := oprot.WriteFieldStop(ctx); err != nil {
     return thrift.PrependError("write field stop error: ", err) }
@@ -2486,6 +2570,18 @@ func (p *InsertNonAlignedColumnRecordsReq) writeField7(ctx context.Context, opro
   return err
 }
 
+func (p *InsertNonAlignedColumnRecordsReq) writeField8(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetTimePrecision() {
+    if err := oprot.WriteFieldBegin(ctx, "timePrecision", thrift.STRING, 8); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 8:timePrecision: ", p), err) }
+    if err := oprot.WriteString(ctx, string(*p.TimePrecision)); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T.timePrecision (8) field write error: ", p), err) }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 8:timePrecision: ", p), err) }
+  }
+  return err
+}
+
 func (p *InsertNonAlignedColumnRecordsReq) Equals(other *InsertNonAlignedColumnRecordsReq) bool {
   if p == other {
     return true
@@ -2523,6 +2619,12 @@ func (p *InsertNonAlignedColumnRecordsReq) Equals(other *InsertNonAlignedColumnR
       if _tgt != _src29 { return false }
     }
   }
+  if p.TimePrecision != other.TimePrecision {
+    if p.TimePrecision == nil || other.TimePrecision == nil {
+      return false
+    }
+    if (*p.TimePrecision) != (*other.TimePrecision) { return false }
+  }
   return true
 }
 
@@ -2541,6 +2643,7 @@ func (p *InsertNonAlignedColumnRecordsReq) String() string {
 //  - BitmapList
 //  - DataTypeList
 //  - TagsList
+//  - TimePrecision
 type InsertRowRecordsReq struct {
   SessionId int64 `thrift:"sessionId,1,required" db:"sessionId" json:"sessionId"`
   Paths []string `thrift:"paths,2,required" db:"paths" json:"paths"`
@@ -2549,6 +2652,7 @@ type InsertRowRecordsReq struct {
   BitmapList [][]byte `thrift:"bitmapList,5,required" db:"bitmapList" json:"bitmapList"`
   DataTypeList []DataType `thrift:"dataTypeList,6,required" db:"dataTypeList" json:"dataTypeList"`
   TagsList []map[string]string `thrift:"tagsList,7" db:"tagsList" json:"tagsList,omitempty"`
+  TimePrecision *string `thrift:"timePrecision,8" db:"timePrecision" json:"timePrecision,omitempty"`
 }
 
 func NewInsertRowRecordsReq() *InsertRowRecordsReq {
@@ -2584,8 +2688,19 @@ var InsertRowRecordsReq_TagsList_DEFAULT []map[string]string
 func (p *InsertRowRecordsReq) GetTagsList() []map[string]string {
   return p.TagsList
 }
+var InsertRowRecordsReq_TimePrecision_DEFAULT string
+func (p *InsertRowRecordsReq) GetTimePrecision() string {
+  if !p.IsSetTimePrecision() {
+    return InsertRowRecordsReq_TimePrecision_DEFAULT
+  }
+return *p.TimePrecision
+}
 func (p *InsertRowRecordsReq) IsSetTagsList() bool {
   return p.TagsList != nil
+}
+
+func (p *InsertRowRecordsReq) IsSetTimePrecision() bool {
+  return p.TimePrecision != nil
 }
 
 func (p *InsertRowRecordsReq) Read(ctx context.Context, iprot thrift.TProtocol) error {
@@ -2676,6 +2791,16 @@ func (p *InsertRowRecordsReq) Read(ctx context.Context, iprot thrift.TProtocol) 
     case 7:
       if fieldTypeId == thrift.LIST {
         if err := p.ReadField7(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 8:
+      if fieldTypeId == thrift.STRING {
+        if err := p.ReadField8(ctx, iprot); err != nil {
           return err
         }
       } else {
@@ -2863,6 +2988,15 @@ var _val36 string
   return nil
 }
 
+func (p *InsertRowRecordsReq)  ReadField8(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadString(ctx); err != nil {
+  return thrift.PrependError("error reading field 8: ", err)
+} else {
+  p.TimePrecision = &v
+}
+  return nil
+}
+
 func (p *InsertRowRecordsReq) Write(ctx context.Context, oprot thrift.TProtocol) error {
   if err := oprot.WriteStructBegin(ctx, "InsertRowRecordsReq"); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
@@ -2874,6 +3008,7 @@ func (p *InsertRowRecordsReq) Write(ctx context.Context, oprot thrift.TProtocol)
     if err := p.writeField5(ctx, oprot); err != nil { return err }
     if err := p.writeField6(ctx, oprot); err != nil { return err }
     if err := p.writeField7(ctx, oprot); err != nil { return err }
+    if err := p.writeField8(ctx, oprot); err != nil { return err }
   }
   if err := oprot.WriteFieldStop(ctx); err != nil {
     return thrift.PrependError("write field stop error: ", err) }
@@ -3004,6 +3139,18 @@ func (p *InsertRowRecordsReq) writeField7(ctx context.Context, oprot thrift.TPro
   return err
 }
 
+func (p *InsertRowRecordsReq) writeField8(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetTimePrecision() {
+    if err := oprot.WriteFieldBegin(ctx, "timePrecision", thrift.STRING, 8); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 8:timePrecision: ", p), err) }
+    if err := oprot.WriteString(ctx, string(*p.TimePrecision)); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T.timePrecision (8) field write error: ", p), err) }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 8:timePrecision: ", p), err) }
+  }
+  return err
+}
+
 func (p *InsertRowRecordsReq) Equals(other *InsertRowRecordsReq) bool {
   if p == other {
     return true
@@ -3041,6 +3188,12 @@ func (p *InsertRowRecordsReq) Equals(other *InsertRowRecordsReq) bool {
       if _tgt != _src42 { return false }
     }
   }
+  if p.TimePrecision != other.TimePrecision {
+    if p.TimePrecision == nil || other.TimePrecision == nil {
+      return false
+    }
+    if (*p.TimePrecision) != (*other.TimePrecision) { return false }
+  }
   return true
 }
 
@@ -3059,6 +3212,7 @@ func (p *InsertRowRecordsReq) String() string {
 //  - BitmapList
 //  - DataTypeList
 //  - TagsList
+//  - TimePrecision
 type InsertNonAlignedRowRecordsReq struct {
   SessionId int64 `thrift:"sessionId,1,required" db:"sessionId" json:"sessionId"`
   Paths []string `thrift:"paths,2,required" db:"paths" json:"paths"`
@@ -3067,6 +3221,7 @@ type InsertNonAlignedRowRecordsReq struct {
   BitmapList [][]byte `thrift:"bitmapList,5,required" db:"bitmapList" json:"bitmapList"`
   DataTypeList []DataType `thrift:"dataTypeList,6,required" db:"dataTypeList" json:"dataTypeList"`
   TagsList []map[string]string `thrift:"tagsList,7" db:"tagsList" json:"tagsList,omitempty"`
+  TimePrecision *string `thrift:"timePrecision,8" db:"timePrecision" json:"timePrecision,omitempty"`
 }
 
 func NewInsertNonAlignedRowRecordsReq() *InsertNonAlignedRowRecordsReq {
@@ -3102,8 +3257,19 @@ var InsertNonAlignedRowRecordsReq_TagsList_DEFAULT []map[string]string
 func (p *InsertNonAlignedRowRecordsReq) GetTagsList() []map[string]string {
   return p.TagsList
 }
+var InsertNonAlignedRowRecordsReq_TimePrecision_DEFAULT string
+func (p *InsertNonAlignedRowRecordsReq) GetTimePrecision() string {
+  if !p.IsSetTimePrecision() {
+    return InsertNonAlignedRowRecordsReq_TimePrecision_DEFAULT
+  }
+return *p.TimePrecision
+}
 func (p *InsertNonAlignedRowRecordsReq) IsSetTagsList() bool {
   return p.TagsList != nil
+}
+
+func (p *InsertNonAlignedRowRecordsReq) IsSetTimePrecision() bool {
+  return p.TimePrecision != nil
 }
 
 func (p *InsertNonAlignedRowRecordsReq) Read(ctx context.Context, iprot thrift.TProtocol) error {
@@ -3194,6 +3360,16 @@ func (p *InsertNonAlignedRowRecordsReq) Read(ctx context.Context, iprot thrift.T
     case 7:
       if fieldTypeId == thrift.LIST {
         if err := p.ReadField7(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 8:
+      if fieldTypeId == thrift.STRING {
+        if err := p.ReadField8(ctx, iprot); err != nil {
           return err
         }
       } else {
@@ -3381,6 +3557,15 @@ var _val49 string
   return nil
 }
 
+func (p *InsertNonAlignedRowRecordsReq)  ReadField8(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadString(ctx); err != nil {
+  return thrift.PrependError("error reading field 8: ", err)
+} else {
+  p.TimePrecision = &v
+}
+  return nil
+}
+
 func (p *InsertNonAlignedRowRecordsReq) Write(ctx context.Context, oprot thrift.TProtocol) error {
   if err := oprot.WriteStructBegin(ctx, "InsertNonAlignedRowRecordsReq"); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
@@ -3392,6 +3577,7 @@ func (p *InsertNonAlignedRowRecordsReq) Write(ctx context.Context, oprot thrift.
     if err := p.writeField5(ctx, oprot); err != nil { return err }
     if err := p.writeField6(ctx, oprot); err != nil { return err }
     if err := p.writeField7(ctx, oprot); err != nil { return err }
+    if err := p.writeField8(ctx, oprot); err != nil { return err }
   }
   if err := oprot.WriteFieldStop(ctx); err != nil {
     return thrift.PrependError("write field stop error: ", err) }
@@ -3522,6 +3708,18 @@ func (p *InsertNonAlignedRowRecordsReq) writeField7(ctx context.Context, oprot t
   return err
 }
 
+func (p *InsertNonAlignedRowRecordsReq) writeField8(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetTimePrecision() {
+    if err := oprot.WriteFieldBegin(ctx, "timePrecision", thrift.STRING, 8); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 8:timePrecision: ", p), err) }
+    if err := oprot.WriteString(ctx, string(*p.TimePrecision)); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T.timePrecision (8) field write error: ", p), err) }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 8:timePrecision: ", p), err) }
+  }
+  return err
+}
+
 func (p *InsertNonAlignedRowRecordsReq) Equals(other *InsertNonAlignedRowRecordsReq) bool {
   if p == other {
     return true
@@ -3559,6 +3757,12 @@ func (p *InsertNonAlignedRowRecordsReq) Equals(other *InsertNonAlignedRowRecords
       if _tgt != _src55 { return false }
     }
   }
+  if p.TimePrecision != other.TimePrecision {
+    if p.TimePrecision == nil || other.TimePrecision == nil {
+      return false
+    }
+    if (*p.TimePrecision) != (*other.TimePrecision) { return false }
+  }
   return true
 }
 
@@ -3575,12 +3779,14 @@ func (p *InsertNonAlignedRowRecordsReq) String() string {
 //  - StartTime
 //  - EndTime
 //  - TagsList
+//  - TimePrecision
 type DeleteDataInColumnsReq struct {
   SessionId int64 `thrift:"sessionId,1,required" db:"sessionId" json:"sessionId"`
   Paths []string `thrift:"paths,2,required" db:"paths" json:"paths"`
   StartTime int64 `thrift:"startTime,3,required" db:"startTime" json:"startTime"`
   EndTime int64 `thrift:"endTime,4,required" db:"endTime" json:"endTime"`
   TagsList map[string][]string `thrift:"tagsList,5" db:"tagsList" json:"tagsList,omitempty"`
+  TimePrecision *string `thrift:"timePrecision,6" db:"timePrecision" json:"timePrecision,omitempty"`
 }
 
 func NewDeleteDataInColumnsReq() *DeleteDataInColumnsReq {
@@ -3608,8 +3814,19 @@ var DeleteDataInColumnsReq_TagsList_DEFAULT map[string][]string
 func (p *DeleteDataInColumnsReq) GetTagsList() map[string][]string {
   return p.TagsList
 }
+var DeleteDataInColumnsReq_TimePrecision_DEFAULT string
+func (p *DeleteDataInColumnsReq) GetTimePrecision() string {
+  if !p.IsSetTimePrecision() {
+    return DeleteDataInColumnsReq_TimePrecision_DEFAULT
+  }
+return *p.TimePrecision
+}
 func (p *DeleteDataInColumnsReq) IsSetTagsList() bool {
   return p.TagsList != nil
+}
+
+func (p *DeleteDataInColumnsReq) IsSetTimePrecision() bool {
+  return p.TimePrecision != nil
 }
 
 func (p *DeleteDataInColumnsReq) Read(ctx context.Context, iprot thrift.TProtocol) error {
@@ -3676,6 +3893,16 @@ func (p *DeleteDataInColumnsReq) Read(ctx context.Context, iprot thrift.TProtoco
     case 5:
       if fieldTypeId == thrift.MAP {
         if err := p.ReadField5(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 6:
+      if fieldTypeId == thrift.STRING {
+        if err := p.ReadField6(ctx, iprot); err != nil {
           return err
         }
       } else {
@@ -3799,6 +4026,15 @@ var _elem59 string
   return nil
 }
 
+func (p *DeleteDataInColumnsReq)  ReadField6(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadString(ctx); err != nil {
+  return thrift.PrependError("error reading field 6: ", err)
+} else {
+  p.TimePrecision = &v
+}
+  return nil
+}
+
 func (p *DeleteDataInColumnsReq) Write(ctx context.Context, oprot thrift.TProtocol) error {
   if err := oprot.WriteStructBegin(ctx, "DeleteDataInColumnsReq"); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
@@ -3808,6 +4044,7 @@ func (p *DeleteDataInColumnsReq) Write(ctx context.Context, oprot thrift.TProtoc
     if err := p.writeField3(ctx, oprot); err != nil { return err }
     if err := p.writeField4(ctx, oprot); err != nil { return err }
     if err := p.writeField5(ctx, oprot); err != nil { return err }
+    if err := p.writeField6(ctx, oprot); err != nil { return err }
   }
   if err := oprot.WriteFieldStop(ctx); err != nil {
     return thrift.PrependError("write field stop error: ", err) }
@@ -3894,6 +4131,18 @@ func (p *DeleteDataInColumnsReq) writeField5(ctx context.Context, oprot thrift.T
   return err
 }
 
+func (p *DeleteDataInColumnsReq) writeField6(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetTimePrecision() {
+    if err := oprot.WriteFieldBegin(ctx, "timePrecision", thrift.STRING, 6); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 6:timePrecision: ", p), err) }
+    if err := oprot.WriteString(ctx, string(*p.TimePrecision)); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T.timePrecision (6) field write error: ", p), err) }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 6:timePrecision: ", p), err) }
+  }
+  return err
+}
+
 func (p *DeleteDataInColumnsReq) Equals(other *DeleteDataInColumnsReq) bool {
   if p == other {
     return true
@@ -3916,6 +4165,12 @@ func (p *DeleteDataInColumnsReq) Equals(other *DeleteDataInColumnsReq) bool {
       _src62 := _src61[i]
       if _tgt != _src62 { return false }
     }
+  }
+  if p.TimePrecision != other.TimePrecision {
+    if p.TimePrecision == nil || other.TimePrecision == nil {
+      return false
+    }
+    if (*p.TimePrecision) != (*other.TimePrecision) { return false }
   }
   return true
 }
@@ -4173,12 +4428,14 @@ func (p *QueryDataSet) String() string {
 //  - StartTime
 //  - EndTime
 //  - TagsList
+//  - TimePrecision
 type QueryDataReq struct {
   SessionId int64 `thrift:"sessionId,1,required" db:"sessionId" json:"sessionId"`
   Paths []string `thrift:"paths,2,required" db:"paths" json:"paths"`
   StartTime int64 `thrift:"startTime,3,required" db:"startTime" json:"startTime"`
   EndTime int64 `thrift:"endTime,4,required" db:"endTime" json:"endTime"`
   TagsList map[string][]string `thrift:"tagsList,5" db:"tagsList" json:"tagsList,omitempty"`
+  TimePrecision *string `thrift:"timePrecision,6" db:"timePrecision" json:"timePrecision,omitempty"`
 }
 
 func NewQueryDataReq() *QueryDataReq {
@@ -4206,8 +4463,19 @@ var QueryDataReq_TagsList_DEFAULT map[string][]string
 func (p *QueryDataReq) GetTagsList() map[string][]string {
   return p.TagsList
 }
+var QueryDataReq_TimePrecision_DEFAULT string
+func (p *QueryDataReq) GetTimePrecision() string {
+  if !p.IsSetTimePrecision() {
+    return QueryDataReq_TimePrecision_DEFAULT
+  }
+return *p.TimePrecision
+}
 func (p *QueryDataReq) IsSetTagsList() bool {
   return p.TagsList != nil
+}
+
+func (p *QueryDataReq) IsSetTimePrecision() bool {
+  return p.TimePrecision != nil
 }
 
 func (p *QueryDataReq) Read(ctx context.Context, iprot thrift.TProtocol) error {
@@ -4274,6 +4542,16 @@ func (p *QueryDataReq) Read(ctx context.Context, iprot thrift.TProtocol) error {
     case 5:
       if fieldTypeId == thrift.MAP {
         if err := p.ReadField5(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 6:
+      if fieldTypeId == thrift.STRING {
+        if err := p.ReadField6(ctx, iprot); err != nil {
           return err
         }
       } else {
@@ -4397,6 +4675,15 @@ var _elem70 string
   return nil
 }
 
+func (p *QueryDataReq)  ReadField6(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadString(ctx); err != nil {
+  return thrift.PrependError("error reading field 6: ", err)
+} else {
+  p.TimePrecision = &v
+}
+  return nil
+}
+
 func (p *QueryDataReq) Write(ctx context.Context, oprot thrift.TProtocol) error {
   if err := oprot.WriteStructBegin(ctx, "QueryDataReq"); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
@@ -4406,6 +4693,7 @@ func (p *QueryDataReq) Write(ctx context.Context, oprot thrift.TProtocol) error 
     if err := p.writeField3(ctx, oprot); err != nil { return err }
     if err := p.writeField4(ctx, oprot); err != nil { return err }
     if err := p.writeField5(ctx, oprot); err != nil { return err }
+    if err := p.writeField6(ctx, oprot); err != nil { return err }
   }
   if err := oprot.WriteFieldStop(ctx); err != nil {
     return thrift.PrependError("write field stop error: ", err) }
@@ -4492,6 +4780,18 @@ func (p *QueryDataReq) writeField5(ctx context.Context, oprot thrift.TProtocol) 
   return err
 }
 
+func (p *QueryDataReq) writeField6(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetTimePrecision() {
+    if err := oprot.WriteFieldBegin(ctx, "timePrecision", thrift.STRING, 6); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 6:timePrecision: ", p), err) }
+    if err := oprot.WriteString(ctx, string(*p.TimePrecision)); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T.timePrecision (6) field write error: ", p), err) }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 6:timePrecision: ", p), err) }
+  }
+  return err
+}
+
 func (p *QueryDataReq) Equals(other *QueryDataReq) bool {
   if p == other {
     return true
@@ -4514,6 +4814,12 @@ func (p *QueryDataReq) Equals(other *QueryDataReq) bool {
       _src73 := _src72[i]
       if _tgt != _src73 { return false }
     }
+  }
+  if p.TimePrecision != other.TimePrecision {
+    if p.TimePrecision == nil || other.TimePrecision == nil {
+      return false
+    }
+    if (*p.TimePrecision) != (*other.TimePrecision) { return false }
   }
   return true
 }
@@ -5368,6 +5674,7 @@ func (p *StorageEngine) String() string {
 //  - EndTime
 //  - AggregateType
 //  - TagsList
+//  - TimePrecision
 type AggregateQueryReq struct {
   SessionId int64 `thrift:"sessionId,1,required" db:"sessionId" json:"sessionId"`
   Paths []string `thrift:"paths,2,required" db:"paths" json:"paths"`
@@ -5375,6 +5682,7 @@ type AggregateQueryReq struct {
   EndTime int64 `thrift:"endTime,4,required" db:"endTime" json:"endTime"`
   AggregateType AggregateType `thrift:"aggregateType,5,required" db:"aggregateType" json:"aggregateType"`
   TagsList map[string][]string `thrift:"tagsList,6" db:"tagsList" json:"tagsList,omitempty"`
+  TimePrecision *string `thrift:"timePrecision,7" db:"timePrecision" json:"timePrecision,omitempty"`
 }
 
 func NewAggregateQueryReq() *AggregateQueryReq {
@@ -5406,8 +5714,19 @@ var AggregateQueryReq_TagsList_DEFAULT map[string][]string
 func (p *AggregateQueryReq) GetTagsList() map[string][]string {
   return p.TagsList
 }
+var AggregateQueryReq_TimePrecision_DEFAULT string
+func (p *AggregateQueryReq) GetTimePrecision() string {
+  if !p.IsSetTimePrecision() {
+    return AggregateQueryReq_TimePrecision_DEFAULT
+  }
+return *p.TimePrecision
+}
 func (p *AggregateQueryReq) IsSetTagsList() bool {
   return p.TagsList != nil
+}
+
+func (p *AggregateQueryReq) IsSetTimePrecision() bool {
+  return p.TimePrecision != nil
 }
 
 func (p *AggregateQueryReq) Read(ctx context.Context, iprot thrift.TProtocol) error {
@@ -5486,6 +5805,16 @@ func (p *AggregateQueryReq) Read(ctx context.Context, iprot thrift.TProtocol) er
     case 6:
       if fieldTypeId == thrift.MAP {
         if err := p.ReadField6(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 7:
+      if fieldTypeId == thrift.STRING {
+        if err := p.ReadField7(ctx, iprot); err != nil {
           return err
         }
       } else {
@@ -5622,6 +5951,15 @@ var _elem91 string
   return nil
 }
 
+func (p *AggregateQueryReq)  ReadField7(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadString(ctx); err != nil {
+  return thrift.PrependError("error reading field 7: ", err)
+} else {
+  p.TimePrecision = &v
+}
+  return nil
+}
+
 func (p *AggregateQueryReq) Write(ctx context.Context, oprot thrift.TProtocol) error {
   if err := oprot.WriteStructBegin(ctx, "AggregateQueryReq"); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
@@ -5632,6 +5970,7 @@ func (p *AggregateQueryReq) Write(ctx context.Context, oprot thrift.TProtocol) e
     if err := p.writeField4(ctx, oprot); err != nil { return err }
     if err := p.writeField5(ctx, oprot); err != nil { return err }
     if err := p.writeField6(ctx, oprot); err != nil { return err }
+    if err := p.writeField7(ctx, oprot); err != nil { return err }
   }
   if err := oprot.WriteFieldStop(ctx); err != nil {
     return thrift.PrependError("write field stop error: ", err) }
@@ -5728,6 +6067,18 @@ func (p *AggregateQueryReq) writeField6(ctx context.Context, oprot thrift.TProto
   return err
 }
 
+func (p *AggregateQueryReq) writeField7(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetTimePrecision() {
+    if err := oprot.WriteFieldBegin(ctx, "timePrecision", thrift.STRING, 7); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 7:timePrecision: ", p), err) }
+    if err := oprot.WriteString(ctx, string(*p.TimePrecision)); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T.timePrecision (7) field write error: ", p), err) }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 7:timePrecision: ", p), err) }
+  }
+  return err
+}
+
 func (p *AggregateQueryReq) Equals(other *AggregateQueryReq) bool {
   if p == other {
     return true
@@ -5751,6 +6102,12 @@ func (p *AggregateQueryReq) Equals(other *AggregateQueryReq) bool {
       _src94 := _src93[i]
       if _tgt != _src94 { return false }
     }
+  }
+  if p.TimePrecision != other.TimePrecision {
+    if p.TimePrecision == nil || other.TimePrecision == nil {
+      return false
+    }
+    if (*p.TimePrecision) != (*other.TimePrecision) { return false }
   }
   return true
 }
@@ -6208,11 +6565,13 @@ func (p *AggregateQueryResp) String() string {
 //  - Paths
 //  - StartTime
 //  - TagsList
+//  - TimePrecision
 type LastQueryReq struct {
   SessionId int64 `thrift:"sessionId,1,required" db:"sessionId" json:"sessionId"`
   Paths []string `thrift:"paths,2,required" db:"paths" json:"paths"`
   StartTime int64 `thrift:"startTime,3,required" db:"startTime" json:"startTime"`
   TagsList map[string][]string `thrift:"tagsList,4" db:"tagsList" json:"tagsList,omitempty"`
+  TimePrecision *string `thrift:"timePrecision,5" db:"timePrecision" json:"timePrecision,omitempty"`
 }
 
 func NewLastQueryReq() *LastQueryReq {
@@ -6236,8 +6595,19 @@ var LastQueryReq_TagsList_DEFAULT map[string][]string
 func (p *LastQueryReq) GetTagsList() map[string][]string {
   return p.TagsList
 }
+var LastQueryReq_TimePrecision_DEFAULT string
+func (p *LastQueryReq) GetTimePrecision() string {
+  if !p.IsSetTimePrecision() {
+    return LastQueryReq_TimePrecision_DEFAULT
+  }
+return *p.TimePrecision
+}
 func (p *LastQueryReq) IsSetTagsList() bool {
   return p.TagsList != nil
+}
+
+func (p *LastQueryReq) IsSetTimePrecision() bool {
+  return p.TimePrecision != nil
 }
 
 func (p *LastQueryReq) Read(ctx context.Context, iprot thrift.TProtocol) error {
@@ -6292,6 +6662,16 @@ func (p *LastQueryReq) Read(ctx context.Context, iprot thrift.TProtocol) error {
     case 4:
       if fieldTypeId == thrift.MAP {
         if err := p.ReadField4(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 5:
+      if fieldTypeId == thrift.STRING {
+        if err := p.ReadField5(ctx, iprot); err != nil {
           return err
         }
       } else {
@@ -6403,6 +6783,15 @@ var _elem107 string
   return nil
 }
 
+func (p *LastQueryReq)  ReadField5(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadString(ctx); err != nil {
+  return thrift.PrependError("error reading field 5: ", err)
+} else {
+  p.TimePrecision = &v
+}
+  return nil
+}
+
 func (p *LastQueryReq) Write(ctx context.Context, oprot thrift.TProtocol) error {
   if err := oprot.WriteStructBegin(ctx, "LastQueryReq"); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
@@ -6411,6 +6800,7 @@ func (p *LastQueryReq) Write(ctx context.Context, oprot thrift.TProtocol) error 
     if err := p.writeField2(ctx, oprot); err != nil { return err }
     if err := p.writeField3(ctx, oprot); err != nil { return err }
     if err := p.writeField4(ctx, oprot); err != nil { return err }
+    if err := p.writeField5(ctx, oprot); err != nil { return err }
   }
   if err := oprot.WriteFieldStop(ctx); err != nil {
     return thrift.PrependError("write field stop error: ", err) }
@@ -6487,6 +6877,18 @@ func (p *LastQueryReq) writeField4(ctx context.Context, oprot thrift.TProtocol) 
   return err
 }
 
+func (p *LastQueryReq) writeField5(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetTimePrecision() {
+    if err := oprot.WriteFieldBegin(ctx, "timePrecision", thrift.STRING, 5); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 5:timePrecision: ", p), err) }
+    if err := oprot.WriteString(ctx, string(*p.TimePrecision)); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T.timePrecision (5) field write error: ", p), err) }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 5:timePrecision: ", p), err) }
+  }
+  return err
+}
+
 func (p *LastQueryReq) Equals(other *LastQueryReq) bool {
   if p == other {
     return true
@@ -6508,6 +6910,12 @@ func (p *LastQueryReq) Equals(other *LastQueryReq) bool {
       _src110 := _src109[i]
       if _tgt != _src110 { return false }
     }
+  }
+  if p.TimePrecision != other.TimePrecision {
+    if p.TimePrecision == nil || other.TimePrecision == nil {
+      return false
+    }
+    if (*p.TimePrecision) != (*other.TimePrecision) { return false }
   }
   return true
 }
@@ -6926,6 +7334,7 @@ func (p *LastQueryResp) String() string {
 //  - AggregateType
 //  - Precision
 //  - TagsList
+//  - TimePrecision
 type DownsampleQueryReq struct {
   SessionId int64 `thrift:"sessionId,1,required" db:"sessionId" json:"sessionId"`
   Paths []string `thrift:"paths,2,required" db:"paths" json:"paths"`
@@ -6934,6 +7343,7 @@ type DownsampleQueryReq struct {
   AggregateType AggregateType `thrift:"aggregateType,5,required" db:"aggregateType" json:"aggregateType"`
   Precision int64 `thrift:"precision,6,required" db:"precision" json:"precision"`
   TagsList map[string][]string `thrift:"tagsList,7" db:"tagsList" json:"tagsList,omitempty"`
+  TimePrecision *string `thrift:"timePrecision,8" db:"timePrecision" json:"timePrecision,omitempty"`
 }
 
 func NewDownsampleQueryReq() *DownsampleQueryReq {
@@ -6969,8 +7379,19 @@ var DownsampleQueryReq_TagsList_DEFAULT map[string][]string
 func (p *DownsampleQueryReq) GetTagsList() map[string][]string {
   return p.TagsList
 }
+var DownsampleQueryReq_TimePrecision_DEFAULT string
+func (p *DownsampleQueryReq) GetTimePrecision() string {
+  if !p.IsSetTimePrecision() {
+    return DownsampleQueryReq_TimePrecision_DEFAULT
+  }
+return *p.TimePrecision
+}
 func (p *DownsampleQueryReq) IsSetTagsList() bool {
   return p.TagsList != nil
+}
+
+func (p *DownsampleQueryReq) IsSetTimePrecision() bool {
+  return p.TimePrecision != nil
 }
 
 func (p *DownsampleQueryReq) Read(ctx context.Context, iprot thrift.TProtocol) error {
@@ -7061,6 +7482,16 @@ func (p *DownsampleQueryReq) Read(ctx context.Context, iprot thrift.TProtocol) e
     case 7:
       if fieldTypeId == thrift.MAP {
         if err := p.ReadField7(ctx, iprot); err != nil {
+          return err
+        }
+      } else {
+        if err := iprot.Skip(ctx, fieldTypeId); err != nil {
+          return err
+        }
+      }
+    case 8:
+      if fieldTypeId == thrift.STRING {
+        if err := p.ReadField8(ctx, iprot); err != nil {
           return err
         }
       } else {
@@ -7209,6 +7640,15 @@ var _elem123 string
   return nil
 }
 
+func (p *DownsampleQueryReq)  ReadField8(ctx context.Context, iprot thrift.TProtocol) error {
+  if v, err := iprot.ReadString(ctx); err != nil {
+  return thrift.PrependError("error reading field 8: ", err)
+} else {
+  p.TimePrecision = &v
+}
+  return nil
+}
+
 func (p *DownsampleQueryReq) Write(ctx context.Context, oprot thrift.TProtocol) error {
   if err := oprot.WriteStructBegin(ctx, "DownsampleQueryReq"); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
@@ -7220,6 +7660,7 @@ func (p *DownsampleQueryReq) Write(ctx context.Context, oprot thrift.TProtocol) 
     if err := p.writeField5(ctx, oprot); err != nil { return err }
     if err := p.writeField6(ctx, oprot); err != nil { return err }
     if err := p.writeField7(ctx, oprot); err != nil { return err }
+    if err := p.writeField8(ctx, oprot); err != nil { return err }
   }
   if err := oprot.WriteFieldStop(ctx); err != nil {
     return thrift.PrependError("write field stop error: ", err) }
@@ -7326,6 +7767,18 @@ func (p *DownsampleQueryReq) writeField7(ctx context.Context, oprot thrift.TProt
   return err
 }
 
+func (p *DownsampleQueryReq) writeField8(ctx context.Context, oprot thrift.TProtocol) (err error) {
+  if p.IsSetTimePrecision() {
+    if err := oprot.WriteFieldBegin(ctx, "timePrecision", thrift.STRING, 8); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 8:timePrecision: ", p), err) }
+    if err := oprot.WriteString(ctx, string(*p.TimePrecision)); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T.timePrecision (8) field write error: ", p), err) }
+    if err := oprot.WriteFieldEnd(ctx); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 8:timePrecision: ", p), err) }
+  }
+  return err
+}
+
 func (p *DownsampleQueryReq) Equals(other *DownsampleQueryReq) bool {
   if p == other {
     return true
@@ -7350,6 +7803,12 @@ func (p *DownsampleQueryReq) Equals(other *DownsampleQueryReq) bool {
       _src126 := _src125[i]
       if _tgt != _src126 { return false }
     }
+  }
+  if p.TimePrecision != other.TimePrecision {
+    if p.TimePrecision == nil || other.TimePrecision == nil {
+      return false
+    }
+    if (*p.TimePrecision) != (*other.TimePrecision) { return false }
   }
   return true
 }

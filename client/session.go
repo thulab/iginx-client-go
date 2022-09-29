@@ -321,6 +321,10 @@ func (s *Session) BatchDeleteTimeSeries(paths []string) error {
 }
 
 func (s *Session) InsertRowRecords(paths []string, timestamps []int64, valueList [][]interface{}, dataTypeList []rpc.DataType, tagsList []map[string]string) error {
+    return InsertRowRecords(paths, timestamps, valueList, dataTypeList, tagsList, nil)
+}
+
+func (s *Session) InsertRowRecords(paths []string, timestamps []int64, valueList [][]interface{}, dataTypeList []rpc.DataType, tagsList []map[string]string, timePrecision string) error {
 	if paths == nil || timestamps == nil || valueList == nil || dataTypeList == nil ||
 		len(paths) == 0 || len(timestamps) == 0 || len(valueList) == 0 || len(dataTypeList) == 0 {
 		return errors.New("invalid insert request")
@@ -412,6 +416,7 @@ func (s *Session) InsertRowRecords(paths []string, timestamps []int64, valueList
 		BitmapList:   bitmapBufferList,
 		DataTypeList: sortedDataTypeList,
 		TagsList:     sortedTagsList,
+		timePrecision:timePrecision,
 	}
 
 	status, err := s.client.InsertRowRecords(context.Background(), &req)
@@ -428,6 +433,10 @@ func (s *Session) InsertRowRecords(paths []string, timestamps []int64, valueList
 }
 
 func (s *Session) InsertNonAlignedRowRecords(paths []string, timestamps []int64, valueList [][]interface{}, dataTypeList []rpc.DataType, tagsList []map[string]string) error {
+    return InsertNonAlignedRowRecords(paths, timestamps, valueList, dataTypeList, tagsList, nil)
+}
+
+func (s *Session) InsertNonAlignedRowRecords(paths []string, timestamps []int64, valueList [][]interface{}, dataTypeList []rpc.DataType, tagsList []map[string]string, timePrecision string) error {
 	if paths == nil || timestamps == nil || valueList == nil || dataTypeList == nil ||
 		len(paths) == 0 || len(timestamps) == 0 || len(valueList) == 0 || len(dataTypeList) == 0 {
 		return errors.New("invalid insert request")
@@ -519,6 +528,7 @@ func (s *Session) InsertNonAlignedRowRecords(paths []string, timestamps []int64,
 		BitmapList:   bitmapBufferList,
 		DataTypeList: sortedDataTypeList,
 		TagsList:     sortedTagsList,
+		timePrecision:timePrecision,
 	}
 
 	status, err := s.client.InsertNonAlignedRowRecords(context.Background(), &req)
@@ -535,6 +545,10 @@ func (s *Session) InsertNonAlignedRowRecords(paths []string, timestamps []int64,
 }
 
 func (s *Session) InsertColumnRecords(paths []string, timestamps []int64, valueList [][]interface{}, dataTypeList []rpc.DataType, tagsList []map[string]string) error {
+    return InsertColumnRecords(paths, timestamps, valueList, dataTypeList, tagsList, nil)
+}
+
+func (s *Session) InsertColumnRecords(paths []string, timestamps []int64, valueList [][]interface{}, dataTypeList []rpc.DataType, tagsList []map[string]string, timePrecision string) error {
 	if paths == nil || timestamps == nil || valueList == nil || dataTypeList == nil ||
 		len(paths) == 0 || len(timestamps) == 0 || len(valueList) == 0 || len(dataTypeList) == 0 {
 		return errors.New("invalid insert request")
@@ -623,6 +637,7 @@ func (s *Session) InsertColumnRecords(paths []string, timestamps []int64, valueL
 		BitmapList:   bitmapBufferList,
 		DataTypeList: sortedDataTypeList,
 		TagsList:     sortedTagsList,
+		timePrecision:timePrecision,
 	}
 
 	status, err := s.client.InsertColumnRecords(context.Background(), &req)
@@ -639,6 +654,10 @@ func (s *Session) InsertColumnRecords(paths []string, timestamps []int64, valueL
 }
 
 func (s *Session) InsertNonAlignedColumnRecords(paths []string, timestamps []int64, valueList [][]interface{}, dataTypeList []rpc.DataType, tagsList []map[string]string) error {
+    return InsertNonAlignedColumnRecords(paths , timestamps, valueList, dataTypeList, tagsList, nil)
+}
+
+func (s *Session) InsertNonAlignedColumnRecords(paths []string, timestamps []int64, valueList [][]interface{}, dataTypeList []rpc.DataType, tagsList []map[string]string, timePrecision string) error {
 	if paths == nil || timestamps == nil || valueList == nil || dataTypeList == nil ||
 		len(paths) == 0 || len(timestamps) == 0 || len(valueList) == 0 || len(dataTypeList) == 0 {
 		return errors.New("invalid insert request")
@@ -727,6 +746,7 @@ func (s *Session) InsertNonAlignedColumnRecords(paths []string, timestamps []int
 		BitmapList:   bitmapBufferList,
 		DataTypeList: sortedDataTypeList,
 		TagsList:     sortedTagsList,
+		timePrecision:timePrecision,
 	}
 
 	status, err := s.client.InsertNonAlignedColumnRecords(context.Background(), &req)
@@ -743,17 +763,26 @@ func (s *Session) InsertNonAlignedColumnRecords(paths []string, timestamps []int
 }
 
 func (s *Session) DeleteData(path string, startTime, endTime int64, tagsList map[string][]string) error {
+    return DeleteData(path, startTime, endTime, tagsList, nil)
+}
+
+func (s *Session) DeleteData(path string, startTime, endTime int64, tagsList map[string][]string, timePrecision string) error {
 	paths := []string{path}
-	return s.BatchDeleteData(paths, startTime, endTime, tagsList)
+	return s.BatchDeleteData(paths, startTime, endTime, tagsList, timePrecision)
 }
 
 func (s *Session) BatchDeleteData(paths []string, startTime, endTime int64, tagsList map[string][]string) error {
+    return BatchDeleteData(paths, startTime, endTime, tagsList, nil)
+}
+
+func (s *Session) BatchDeleteData(paths []string, startTime, endTime int64, tagsList map[string][]string, timePrecision string) error {
 	req := rpc.DeleteDataInColumnsReq{
 		SessionId: s.sessionId,
 		Paths:     paths,
 		StartTime: startTime,
 		EndTime:   endTime,
 		TagsList:  tagsList,
+		timePrecision: timePrecision,
 	}
 
 	status, err := s.client.DeleteDataInColumns(context.Background(), &req)
@@ -770,12 +799,17 @@ func (s *Session) BatchDeleteData(paths []string, startTime, endTime int64, tags
 }
 
 func (s *Session) Query(paths []string, startTime, endTime int64, tagList map[string][]string) (*QueryDataSet, error) {
+    return Query(paths, startTime, endTime, tagsList, nil)
+}
+
+func (s *Session) Query(paths []string, startTime, endTime int64, tagList map[string][]string, timePrecision string) (*QueryDataSet, error) {
 	req := rpc.QueryDataReq{
 		SessionId: s.sessionId,
 		Paths:     s.mergeAndSortPaths(paths),
 		StartTime: startTime,
 		EndTime:   endTime,
 		TagsList:  tagList,
+		timePrecision: timePrecision,
 	}
 
 	resp, err := s.client.QueryData(context.Background(), &req)
@@ -802,6 +836,10 @@ func (s *Session) Query(paths []string, startTime, endTime int64, tagList map[st
 }
 
 func (s *Session) DownSampleQuery(paths []string, startTime, endTime int64, aggregateType rpc.AggregateType, precision int64, tagList map[string][]string) (*QueryDataSet, error) {
+    return DownSampleQuery(paths, startTime, endTime, aggregateType, precision, tagsList, nil)
+}
+
+func (s *Session) DownSampleQuery(paths []string, startTime, endTime int64, aggregateType rpc.AggregateType, precision int64, tagList map[string][]string, timePrecision string) (*QueryDataSet, error) {
 	req := rpc.DownsampleQueryReq{
 		SessionId:     s.sessionId,
 		Paths:         s.mergeAndSortPaths(paths),
@@ -810,6 +848,7 @@ func (s *Session) DownSampleQuery(paths []string, startTime, endTime int64, aggr
 		AggregateType: aggregateType,
 		Precision:     precision,
 		TagsList:      tagList,
+		timePrecision: timePrecision,
 	}
 
 	resp, err := s.client.DownsampleQuery(context.Background(), &req)
@@ -836,6 +875,10 @@ func (s *Session) DownSampleQuery(paths []string, startTime, endTime int64, aggr
 }
 
 func (s *Session) AggregateQuery(paths []string, startTime, endTime int64, aggregateType rpc.AggregateType, tagList map[string][]string) (*AggregateQueryDataSet, error) {
+    return AggregateQuery(paths, startTime, endTime, aggregateType, tagsList, nil)
+}
+
+func (s *Session) AggregateQuery(paths []string, startTime, endTime int64, aggregateType rpc.AggregateType, tagList map[string][]string, timePrecision string) (*AggregateQueryDataSet, error) {
 	req := rpc.AggregateQueryReq{
 		SessionId:     s.sessionId,
 		Paths:         s.mergeAndSortPaths(paths),
@@ -843,6 +886,7 @@ func (s *Session) AggregateQuery(paths []string, startTime, endTime int64, aggre
 		EndTime:       endTime,
 		AggregateType: aggregateType,
 		TagsList:      tagList,
+		timePrecision: timePrecision,
 	}
 
 	resp, err := s.client.AggregateQuery(context.Background(), &req)
@@ -868,11 +912,16 @@ func (s *Session) AggregateQuery(paths []string, startTime, endTime int64, aggre
 }
 
 func (s *Session) LastQuery(paths []string, startTime int64, tagList map[string][]string) (*QueryDataSet, error) {
+    return LastQuery(paths, startTime, tagsList, nil)
+}
+
+func (s *Session) LastQuery(paths []string, startTime int64, tagList map[string][]string, timePrecision string) (*QueryDataSet, error) {
 	req := rpc.LastQueryReq{
 		SessionId: s.sessionId,
 		Paths:     s.mergeAndSortPaths(paths),
 		StartTime: startTime,
 		TagsList:  tagList,
+		timePrecision: timePrecision,
 	}
 
 	resp, err := s.client.LastQuery(context.Background(), &req)
