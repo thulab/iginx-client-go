@@ -1,4 +1,4 @@
-module github.com/THUIGinX/IGinX-client-go
+module github.com/thulab/iginx-client-go
 
 go 1.17
 
